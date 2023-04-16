@@ -9,12 +9,13 @@
 - [X] Build online release count getter 
 """
 import sys
-import requests
 import os
+import requests
 import random
-from src.json_tool import json_tool
 import subprocess
+import pprint
 from functools import lru_cache
+from src.json_tool import json_tool
 
 class UpdateController:
     def __init__(self, control_table_path = 'controller.csv', download_path = 'data/latest'):
@@ -57,15 +58,10 @@ class UpdateController:
         output = self._get_control_search_result(pkg_name)
         return len(output) > 0
 
-    @lru_cache
-    def download_latest(self, pkg_name):
-        url = f"https://pypi.org/pypi/{pkg_name}/json"
-        result = requests.get(url).json()
-        return result
-
     def get_online_release_count(self, pkg_name):
         result = self.download_latest(pkg_name)
         return len(result["releases"].keys())
+        
 
     def update_release_count(self, pkg_name, count):
         if self.already_download(pkg_name):
@@ -84,12 +80,26 @@ class UpdateController:
     def _get_control_search_result(self, pkg_name):
         output = subprocess.run(['grep', f'^{pkg_name},', self._path], capture_output=True).stdout
         return output
-    
+
+    @lru_cache
+    def download_latest(self, pkg_name):
+        url = f"https://pypi.org/pypi/{pkg_name}/json"
+        result = requests.get(url).json()
+        try:
+            assert 'releases' in result
+        except AssertionError:
+            print(f'latest result not found for {pkg_name}:')
+            pprint.pprint(result)
+            raise KeyError
+        return result    
 
 def update(pkg_name):
-    controller = UpdateController('data/latest.control')
-    controller.update(pkg_name)
-    controller.assert_update(pkg_name)
+    try:
+        controller = UpdateController('data/latest.control')
+        controller.update(pkg_name)
+        controller.assert_update(pkg_name)
+    except KeyError:
+        pass
 
 if __name__ == "__main__":
     update(sys.argv[1])
