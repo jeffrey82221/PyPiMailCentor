@@ -39,7 +39,7 @@ class UpdateController:
     def assert_update(self, pkg_name):
         offline_cnt = self.get_offline_release_count(pkg_name)
         online_cnt = self.get_online_release_count(pkg_name)
-        assert offline_cnt == online_cnt, f'{pkg_name} has inconsistent release count. online: {online_cnt}; offline: {offline_cnt'
+        assert offline_cnt == online_cnt, f'{pkg_name} has inconsistent release count. online: {online_cnt}; offline: {offline_cnt}'
         latest = json_tool.load(f'{self._download_path}/{pkg_name}.json')
         assert latest == self.download_latest(pkg_name), f'{pkg_name} not identical'
 
@@ -83,25 +83,35 @@ class UpdateController:
         output = subprocess.run(['grep', f'^{pkg_name},', self._path], capture_output=True).stdout
         return output
 
+    def downloadable(self, pkg_name):
+        return 'releases' in self.download_latest(pkg_name)
+
     @lru_cache
     def download_latest(self, pkg_name):
-        url = f"https://pypi.org/pypi/{pkg_name}/json"
-        result = requests.get(url).json()
-        try:
-            assert 'releases' in result
-        except AssertionError:
-            print(f'latest result not found for {pkg_name}:')
-            pprint.pprint(result)
-            raise KeyError
-        return result    
+        return self.download_with_retries(pkg_name)
+
+    def download_with_retries(self, pkg_name):
+        retry_cnt = 0
+        while retry_cnt < 5:
+            try:
+                url = f"https://pypi.org/pypi/{pkg_name}/json"
+                result = requests.get(url).json()
+                assert 'releases' in result
+                break
+            except:
+                retry_cnt += 1
+        return result
+
 
 def update(pkg_name):
-    try:
-        controller = UpdateController('data/latest.control')
+    controller = UpdateController('data/latest.control')
+    if controller.downloadable(pkg_name):
         controller.update(pkg_name)
         controller.assert_update(pkg_name)
-    except KeyError:
-        pass
+    else:
+        print(pkg_name, 'not found:')
+        pprint.pprint(controller.download_latest(pkg_name))
+        
 
 if __name__ == "__main__":
     update(sys.argv[1])
