@@ -15,6 +15,7 @@ import random
 import subprocess
 import pprint
 from functools import lru_cache
+import time
 from src.json_tool import json_tool
 
 class UpdateController:
@@ -99,6 +100,7 @@ class UpdateController:
                 assert 'releases' in result
                 break
             except:
+                time.sleep(retry_cnt)
                 retry_cnt += 1
         return result
 
