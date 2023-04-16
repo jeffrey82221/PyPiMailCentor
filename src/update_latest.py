@@ -1,12 +1,12 @@
 """
-- [ ] Build latest json updating control table:
-    - [ ] 1) Get release count 
+- [X] Build latest json updating control table:
+    - [X] 1) Get release count 
     grep "^tensorflow," test.txt
-    - [ ] 2) Remove line from file and save to new file
+    - [X] 2) Remove line from file and save to new file
     sed '/tensorflow, 34/d' test.txt >> new_test.txt; rm test.txt; mv new_test.txt test.txt
-    - [ ] 3) Add package with new release count to the new file 
+    - [X] 3) Add package with new release count to the new file 
     echo 'jskiner, 12312312' >> new_text.txt
-- [ ] Build online release count getter 
+- [X] Build online release count getter 
 """
 import sys
 import requests
