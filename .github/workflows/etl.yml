@@ -1,7 +1,7 @@
 name: ETL
-on:
-  schedule:
-    - cron: "0 0 * * *"
+on: push
+  # schedule:
+  #   - cron: "0 0 * * *"
 jobs:
   update_package_names:
     runs-on: ubuntu-latest
@@ -100,7 +100,7 @@ jobs:
           delete-branch: true
           labels: "automerge"
       - name: Merge Pull Request - Jsons
-        if: steps.pr_id.outputs.pull-request-operation == 'created'
+        if: steps.pr_jsons.outputs.pull-request-operation == 'created'
         uses: "pascalgn/automerge-action@v0.15.6"
         env:
           GITHUB_TOKEN: "${{ secrets.PERSONAL_TOKEN }}"
