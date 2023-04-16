@@ -1,7 +1,7 @@
 name: ETL
-on: push
-  # schedule:
-  #   - cron: "0 0 * * *"
+on: 
+  schedule:
+    - cron: "0 0 * * *"
 jobs:
   update_package_names:
     runs-on: ubuntu-latest
@@ -90,7 +90,7 @@ jobs:
           github_token: ${{ secrets.PERSONAL_TOKEN }}
           branch: update_latest/${{ matrix.alpha }}
       - name: Pull Request - Jsons
-        id: pr_id
+        id: pr_jsons
         uses: peter-evans/create-pull-request@v5
         with:
           title: "Upload Latest Json(s) from update_latest/${{ matrix.alpha }}"
@@ -112,7 +112,7 @@ jobs:
           MERGE_DELETE_BRANCH: "true"
           MERGE_RETRY_SLEEP: "${{ matrix.alpha }}0000"
           MERGE_REQUIRED_APPROVALS: "0"
-          PULL_REQUEST: "${{ steps.pr_id.outputs.pull-request-number }}"
+          PULL_REQUEST: "${{ steps.pr_jsons.outputs.pull-request-number }}"
       - name: Git Commit - Control Table
         run: |
           git config --global user.name "jeffrey82221"
@@ -126,7 +126,7 @@ jobs:
           github_token: ${{ secrets.PERSONAL_TOKEN }}
           branch: update_latest/${{ matrix.alpha }}
       - name: Pull Request - Control Table
-        id: pr_id
+        id: pr_control
         uses: peter-evans/create-pull-request@v5
         with:
           title: "Update control table from update_latest/${{ matrix.alpha }}"
@@ -148,7 +148,7 @@ jobs:
           MERGE_DELETE_BRANCH: "true"
           MERGE_RETRY_SLEEP: "${{ matrix.alpha }}0000"
           MERGE_REQUIRED_APPROVALS: "0"
-          PULL_REQUEST: "${{ steps.pr_id.outputs.pull-request-number }}"
+          PULL_REQUEST: "${{ steps.pr_control.outputs.pull-request-number }}"
   update_release_time:
     name: Do Release Time Table ETL
     needs: update_latest_json
