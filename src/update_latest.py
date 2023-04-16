@@ -1,3 +1,9 @@
+"""
+- [ ] Get release count 
+grep "^pandas$" data/package_names.txt
+- [ ] Save release count to a file 
+- [ ] 
+"""
 import sys
 import requests
 import os
