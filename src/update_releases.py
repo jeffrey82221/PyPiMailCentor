@@ -43,7 +43,7 @@ class ReleaseUpdator:
 
     @staticmethod
     def get_release_versions(pkg_name):
-        json_path = glob.glob(f"data/latest/{pkg_name}.rc*.json")
+        json_path = glob.glob(f"data/latest/{pkg_name}.json")
         if json_path:
             result = json_tool.load(json_path[0])
             return list(result["releases"].keys())
