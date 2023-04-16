@@ -37,9 +37,9 @@ class UpdateController:
             self.update_release_count(pkg_name, release_cnt)
     
     def assert_update(self, pkg_name):
-        assert self.get_offline_release_count(pkg_name) == self.get_online_release_count(pkg_name)
+        assert self.get_offline_release_count(pkg_name) == self.get_online_release_count(pkg_name), f'{pkg_name} not updated'
         latest = json_tool.load(f'{self._download_path}/{pkg_name}.json')
-        assert latest == self.download_latest(pkg_name)
+        assert latest == self.download_latest(pkg_name), f'{pkg_name} not identical'
 
     @staticmethod
     def create_file(path):
