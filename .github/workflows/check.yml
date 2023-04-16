@@ -1,7 +1,7 @@
 name: Check Schema
-on: 
-  schedule:
-    - cron: "0 10 * * *"
+on: push 
+  # schedule:
+  #  - cron: "0 10 * * *"
 jobs:
   check_schema:
     name: Checking the Schema of Release Json(s)
