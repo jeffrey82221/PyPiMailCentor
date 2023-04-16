@@ -23,26 +23,26 @@ jobs:
           pip install blosc
           pip install scalable-cuckoo-filter
           pip install requests
-      - name: Sample and Download Json (1)
+      - name: Sample and Download Release Json
         run: |
           python sample_n_download.py data/package_names.txt ./download 1000
-      - name: Sample and Decrypt Json (2)
+      - name: Sample and Decrypt Latest Json
         run: |
           python sample_n_decrypt.py data/latest ./decrypt 10000
-      - name: Run JSkiner 1
+      - name: Run JSkiner for Release Schema
         run: jskiner --in-path ./download --nworkers 2 --verbose true --out data/release.schema --batch-size 100 --cuckoo-path data/release.cuckoo --cuckoo-size 50000000 --cuckoo-fpr 0.1
-      - name: Run JSkiner 2
+      - name: Run JSkiner for Latest Schema
         run: jskiner --in-path ./decrypt --nworkers 2 --verbose true --out data/latest.schema --batch-size 1000 --cuckoo-path data/latest.cuckoo --cuckoo-size 50000000 --cuckoo-fpr 0.1
       - name: Git Config
         run: |
           git config --global user.name "jeffrey82221"
           git config --global user.email "jeffrey82221@gmail.com"
-      - name: Git commit 1
+      - name: Git commit Release Schema
         run: |
           git add data/release.schema
           git add data/release.cuckoo
           git diff-index --quiet HEAD || git commit -m 'update: package release schema'
-      - name: Git commit 2
+      - name: Git commit Latest Schema
         run: |
           git add data/latest.schema
           git add data/latest.cuckoo
