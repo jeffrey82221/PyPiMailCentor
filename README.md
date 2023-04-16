@@ -1,4 +1,4 @@
-# PyPiHub
+# PyPiMailCentor
 
 Automatically sending report about python packages for python developers. This is the derive project of [PyPi_Web_Crawl](https://github.com/jeffrey82221/PyPi_Web_Crawl).
 
