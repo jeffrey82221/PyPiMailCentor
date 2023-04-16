@@ -1,29 +1,22 @@
 import json
-from cryptography.fernet import Fernet
-
-key = Fernet.generate_key()
+import base64
 
 
-class JsonTool:
-    def __init__(self, key_path: str):
-        try:
-            with open(key_path, "rb") as filekey:
-                key = filekey.read()
-            self._fernet = Fernet(key)
-        except:
-            print("no encrypt/decrypt function")
-
+class JsonTool:    
     def dump(self, save_path: str, result: dict):
         json_str = bytes(json.dumps(result, ensure_ascii=False, indent=2), "utf-8")
-        en_json_str = self._fernet.encrypt(json_str)
+        en_json_strs = map(base64.b64encode, json_str.split(b'\n'))
         with open(save_path, "wb") as f:
-            f.write(en_json_str)
+            for string in en_json_strs:
+                f.write(string + b'\n')
             print(save_path, "saved")
 
     def load(self, load_path: str) -> dict:
+        json_strs = []
         with open(load_path, "rb") as f:
-            json_str = self._fernet.decrypt(f.read())
-            result = json.loads(json_str)
+            for string in f:
+                json_strs.append(base64.b64decode(string))
+            result = json.loads(b"\n".join(json_strs))
         return result
 
     @staticmethod
@@ -32,4 +25,4 @@ class JsonTool:
             json.dump(result, f, ensure_ascii=False, indent=2)
 
 
-json_tool = JsonTool("filekey.key")
+json_tool = JsonTool()
