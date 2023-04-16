@@ -10,7 +10,7 @@ Automatically sending report about python packages for python developers. This i
 
 # Plan:
 
-- [ ] Move here the ETL workflow from Pypi_Web_Crawl
+- [X] Move here the ETL workflow from Pypi_Web_Crawl
 - [X] Refactor: extract the json loading and saving core 
 - [X] Add decryption and encryption to the json loading and saving core
 - [X] Add a sample and decrypt module to be use in `check_schema.yml`
@@ -22,5 +22,5 @@ Automatically sending report about python packages for python developers. This i
 - [X] Using auto PR instead of branch merging 
 - [X] Connect check schema together at check.yml (do it everyday midnight.) 
 - [-] Using fast checkout with workspace in the same workspace. 
-- [ ] Using line-by-line encryption to avoid change of full json file.
+- [X] Using line-by-line encryption to avoid change of full json file.
 - [ ] Generate Edge.csv & Node.csv of every month. 
