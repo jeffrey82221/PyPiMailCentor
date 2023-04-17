@@ -18,6 +18,25 @@ from functools import lru_cache
 import time
 from src.json_tool import json_tool
 
+CONTROL_TABLE_PATH = '/tmp/latest.control'
+
+class Logger:
+    def __init__(self, log_path):
+        self._log_path = log_path
+    
+    def apply(self, func):
+        def wrap(*args):
+            self.append(*args[1:])
+            return func(*args)
+        return wrap
+
+    def append(self, *args):
+        with open(self._log_path, 'a') as f:
+            f.write(", ".join(map(str, args)) + '\n')
+
+delete_logger = Logger('delete.log')
+append_logger = Logger('append.log')
+
 class UpdateController:
     def __init__(self, control_table_path = 'controller.csv', download_path = 'data/latest'):
         UpdateController.create_file(control_table_path)
@@ -64,19 +83,24 @@ class UpdateController:
     def get_online_release_count(self, pkg_name):
         result = self.download_latest(pkg_name)
         return len(result["releases"].keys())
-        
 
     def update_release_count(self, pkg_name, count):
         if self.already_download(pkg_name):
-            line_str = self._get_control_search_result(pkg_name)
-            random_tmp_file = f'/tmp/{str(random.randint(0,10**30))}.csv'
-            # sed '/tensorflow, 34/d' test.txt >> new_test.txt; rm test.txt; mv new_test.txt test.txt
-            UpdateController.create_file(random_tmp_file)
-            assert os.path.exists(random_tmp_file)
-            subprocess.run(['sed', f"'/{line_str}/d'", self._path, '>>', random_tmp_file])
-            os.remove(self._path)
-            os.rename(random_tmp_file, self._path)
-            
+            self._delete_line(pkg_name)
+        self._append_line(pkg_name, count)
+
+    @delete_logger.apply
+    def _delete_line(self, pkg_name):
+        line_str = self._get_control_search_result(pkg_name)
+        random_tmp_file = f'/tmp/{str(random.randint(0,10**30))}.csv'
+        UpdateController.create_file(random_tmp_file)
+        assert os.path.exists(random_tmp_file)
+        subprocess.run(['sed', f"'/{line_str}/d'", self._path, '>>', random_tmp_file])
+        os.remove(self._path)
+        os.rename(random_tmp_file, self._path)
+    
+    @append_logger.apply
+    def _append_line(self, pkg_name, count):
         with open(self._path, 'a') as f:
             f.write(f'{pkg_name}, {count}\n')
 
@@ -106,7 +130,7 @@ class UpdateController:
 
 
 def update(pkg_name):
-    controller = UpdateController('data/latest.control')
+    controller = UpdateController(CONTROL_TABLE_PATH)
     if controller.downloadable(pkg_name):
         controller.update(pkg_name)
         controller.assert_update(pkg_name)

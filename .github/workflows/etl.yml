@@ -76,7 +76,9 @@ jobs:
           git checkout -b update_latest/${{ matrix.alpha }}
           git push --set-upstream origin update_latest/${{ matrix.alpha }}
       - name: Run update script
-        run: python update_latest_all.py ${{ matrix.alpha }} ${{ matrix.split_cnt }}
+        run: |
+          cp data/latest.control /tmp/latest.control
+          python update_latest_all.py ${{ matrix.alpha }} ${{ matrix.split_cnt }}
       - name: Git Commit - Jsons
         run: |
           git config --global user.name "jeffrey82221"
@@ -113,9 +115,44 @@ jobs:
           MERGE_RETRY_SLEEP: "60000"
           MERGE_REQUIRED_APPROVALS: "0"
           PULL_REQUEST: "${{ steps.pr_jsons.outputs.pull-request-number }}"
+      - name: 'Upload Control Table Change Log - append'
+        uses: actions/upload-artifact@v3
+        with:
+          name: "append_${{ matrix.alpha }}"
+          path: append.log
+          retention-days: 1
+      - name: 'Upload Control Table Change Log - append'
+        uses: actions/upload-artifact@v3
+        with:
+          name: "delete_${{ matrix.alpha }}"
+          path: delete.log
+          retention-days: 1
+  apply_control_table_change:
+    name: Apply Change to Control Table
+    needs: update_latest_json
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout 
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ref: 'main'
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: github.com
+      - name: Set Up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Download Change Files
+        uses: actions/download-artifact@v3
+        with:
+          path: control_change_log
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: control_change_log
   update_release_time:
     name: Do Release Time Table ETL
-    needs: update_latest_json
+    needs: apply_control_table_change
     runs-on: ubuntu-latest
     steps:
       - name: checkout 
