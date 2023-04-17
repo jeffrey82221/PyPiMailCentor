@@ -1,1 +1,120 @@
-Unknown()
+Record(
+    {
+        "info": Record(
+            {
+                "author": Optional(Atomic(Str())),
+                "author_email": Atomic(Str()),
+                "bugtrack_url": Atomic(Non()),
+                "classifiers": Array(Atomic(Str())),
+                "description": Atomic(Str()),
+                "description_content_type": Optional(Atomic(Str())),
+                "docs_url": Optional(Atomic(Str())),
+                "download_url": Optional(Atomic(Str())),
+                "downloads": UniformRecord(
+                    FieldSet({"last_day", "last_month", "last_week"}), Atomic(Int())
+                ),
+                "home_page": Optional(Atomic(Str())),
+                "keywords": Optional(Atomic(Str())),
+                "license": Optional(Atomic(Str())),
+                "maintainer": Optional(Atomic(Str())),
+                "maintainer_email": Optional(Atomic(Str())),
+                "name": Atomic(Str()),
+                "package_url": Atomic(Str()),
+                "platform": Optional(Atomic(Str())),
+                "project_url": Atomic(Str()),
+                "project_urls": Optional(
+                    UniformRecord(
+                        FieldSet(
+                            {
+                                "Bug Reports",
+                                "Bug Tracker",
+                                "Bug-Tracker",
+                                "Bugs",
+                                "Change log",
+                                "Changelog",
+                                "Código fonte",
+                                "Dev Docs",
+                                "Discussions",
+                                "Documentation",
+                                "Download",
+                                "Forum",
+                                "Funding",
+                                "G002 Recommendation",
+                                "GitHub",
+                                "Home",
+                                "Homepage",
+                                "Issue Tracker",
+                                "Issue tracker",
+                                "Issues",
+                                "License",
+                                "Repository",
+                                "Research",
+                                "Say Thanks!",
+                                "Slack Chat",
+                                "Source",
+                                "Source Code",
+                                "Source code",
+                                "Source-Code",
+                                "Test-Coverage",
+                                "Tracker",
+                                "Twitter",
+                                "YouTube",
+                                "documentation",
+                                "funding",
+                                "homepage",
+                                "issues",
+                                "source",
+                            }
+                        ),
+                        Atomic(Str()),
+                    )
+                ),
+                "release_url": Atomic(Str()),
+                "requires_dist": Optional(Array(Atomic(Str()))),
+                "requires_python": Optional(Atomic(Str())),
+                "summary": Atomic(Str()),
+                "version": Atomic(Str()),
+                "yanked": Atomic(Bool()),
+                "yanked_reason": Optional(Atomic(Str())),
+            }
+        ),
+        "last_serial": Atomic(Int()),
+        "urls": Array(
+            Record(
+                {
+                    "comment_text": Optional(Atomic(Str())),
+                    "digests": UniformRecord(
+                        FieldSet({"blake2b_256", "md5", "sha256"}), Atomic(Str())
+                    ),
+                    "downloads": Atomic(Int()),
+                    "filename": Atomic(Str()),
+                    "has_sig": Atomic(Bool()),
+                    "md5_digest": Atomic(Str()),
+                    "packagetype": Atomic(Str()),
+                    "python_version": Atomic(Str()),
+                    "requires_python": Optional(Atomic(Str())),
+                    "size": Atomic(Int()),
+                    "upload_time": Atomic(Str()),
+                    "upload_time_iso_8601": Atomic(Str()),
+                    "url": Atomic(Str()),
+                    "yanked": Atomic(Bool()),
+                    "yanked_reason": Optional(Atomic(Str())),
+                }
+            )
+        ),
+        "vulnerabilities": Array(
+            Record(
+                {
+                    "aliases": Array(Atomic(Str())),
+                    "details": Atomic(Str()),
+                    "fixed_in": Array(Atomic(Str())),
+                    "id": Atomic(Str()),
+                    "link": Atomic(Str()),
+                    "source": Atomic(Str()),
+                    "summary": Atomic(Non()),
+                    "withdrawn": Atomic(Non()),
+                }
+            )
+        ),
+    }
+)
