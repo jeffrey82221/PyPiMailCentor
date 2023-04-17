@@ -121,7 +121,7 @@ jobs:
           name: "append_${{ matrix.alpha }}"
           path: append.log
           retention-days: 1
-      - name: 'Upload Control Table Change Log - append'
+      - name: 'Upload Control Table Change Log - delete'
         uses: actions/upload-artifact@v3
         with:
           name: "delete_${{ matrix.alpha }}"
