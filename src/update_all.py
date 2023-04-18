@@ -36,5 +36,5 @@ def update_all(update, index, split_cnt=10):
     # Do update
     with open(f"{SPLIT_PATH}/{file}", "r") as f:
         pkgs = list(map(lambda x: x.strip(), f))
-        for pkg in tqdm.tqdm(pkgs, desc=f'{pkgs[0]}~{pkgs[-1]}'):
+        for pkg in tqdm.tqdm(pkgs, desc=f"{pkgs[0]}~{pkgs[-1]}"):
             update(pkg)

@@ -28,7 +28,9 @@ class ReleaseUpdator:
         )
         releases = list(releases)
         n_filtered_releases = len(releases)
-        print(f"# of releases for {pkg_name} (filtered/all): {n_filtered_releases}/{n_all_releases}")
+        print(
+            f"# of releases for {pkg_name} (filtered/all): {n_filtered_releases}/{n_all_releases}"
+        )
         if releases:
             jsons = map(
                 lambda release: (
@@ -62,7 +64,7 @@ class ReleaseUpdator:
             json_tool.dump(save_path, json_obj)
         else:
             JsonTool._dump_original(save_path, json_obj)
-        print('\t\t', save_path, 'saved')
+        print("\t\t", save_path, "saved")
 
 
 update = ReleaseUpdator().update

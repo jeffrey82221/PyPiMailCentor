@@ -2,13 +2,13 @@ import json
 import base64
 
 
-class JsonTool:    
+class JsonTool:
     def dump(self, save_path: str, result: dict):
         json_str = bytes(json.dumps(result, ensure_ascii=False, indent=2), "utf-8")
-        en_json_strs = map(base64.b64encode, json_str.split(b'\n'))
+        en_json_strs = map(base64.b64encode, json_str.split(b"\n"))
         with open(save_path, "wb") as f:
             for string in en_json_strs:
-                f.write(string + b'\n')
+                f.write(string + b"\n")
             print(save_path, "saved")
 
     def load(self, load_path: str) -> dict:

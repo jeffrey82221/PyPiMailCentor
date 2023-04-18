@@ -16,6 +16,7 @@ from src.json_tool import json_tool
 
 MAX_RUN = 4
 
+
 class TimeFilter:
     """
     Filter out data not in time range
