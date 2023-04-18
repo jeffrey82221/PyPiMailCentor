@@ -1,12 +1,5 @@
 """
-- [X] Build latest json updating control table:
-    - [X] 1) Get release count 
-    grep "^tensorflow," test.txt
-    - [X] 2) Remove line from file and save to new file
-    sed '/tensorflow, 34/d' test.txt >> new_test.txt; rm test.txt; mv new_test.txt test.txt
-    - [X] 3) Add package with new release count to the new file 
-    echo 'jskiner, 12312312' >> new_text.txt
-- [X] Build online release count getter 
+Updating Latest Json Filess from PyPi
 """
 import sys
 import os
