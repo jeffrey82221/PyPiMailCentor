@@ -1,7 +1,7 @@
 name: ETL
-on: 
-  schedule:
-    - cron: "0 0 * * *"
+on: push
+  # schedule:
+  #   - cron: "0 0 * * *"
 jobs:
   update_package_names:
     runs-on: ubuntu-latest
@@ -143,6 +143,9 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
+      - name: Run install
+        run: |
+          pip install requests==2.28.2
       - name: Download Change Files
         uses: actions/download-artifact@v3
         with:
