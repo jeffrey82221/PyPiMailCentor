@@ -1,7 +1,7 @@
 name: ETL
-on: 
-  schedule:
-    - cron: "0 0 * * *"
+on: push
+  # schedule:
+  #   - cron: "0 0 * * *"
 jobs:
   update_package_names:
     runs-on: ubuntu-latest
@@ -147,12 +147,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: control_change_log
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: control_change_log
       - name: Update Control Table
         run: python update_control_table.py 20 control_change_log data/latest.control
-        working-directory: control_change_log
       - name: Git commit
         run: |
           git config --global user.name "jeffrey82221"

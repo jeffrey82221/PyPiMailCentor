@@ -3,7 +3,7 @@ import os
 from src.update_latest import UpdateController
 
 
-def yeild_append(total, src_path, target_path):
+def yeild_append(total, src_path):
     for i in range(total):
         fn = f"{src_path}/append_{i}/append.log"
         if os.path.exists(fn):
@@ -14,7 +14,7 @@ def yeild_append(total, src_path, target_path):
             print(fn, "does not exist")
 
 
-def yeild_delete(total, src_path, target_path):
+def yeild_delete(total, src_path):
     for i in range(total):
         fn = f"{src_path}/delete_{i}/delete.log"
         if os.path.exists(fn):
