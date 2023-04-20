@@ -39,5 +39,5 @@ def update(total, src_path, target_path):
 
 if __name__ == "__main__":
     update(
-        index=int(sys.argv[1]), src_path=str(sys.argv[2]), target_path=str(sys.argv[3])
+        total=int(sys.argv[1]), src_path=str(sys.argv[2]), target_path=str(sys.argv[3])
     )
