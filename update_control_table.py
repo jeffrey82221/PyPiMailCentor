@@ -9,7 +9,7 @@ def yeild_append(total, src_path):
         if os.path.exists(fn):
             with open(fn, "r") as f:
                 for pkg in f:
-                    yield f.strip()
+                    yield pkg.strip()
         else:
             print(fn, "does not exist")
 
@@ -20,7 +20,7 @@ def yeild_delete(total, src_path):
         if os.path.exists(fn):
             with open(fn, "r") as f:
                 for pkg in f:
-                    yield f.strip()
+                    yield pkg.strip()
         else:
             print(fn, "does not exist")
 
