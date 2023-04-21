@@ -13,6 +13,7 @@ import pandas as pd
 import glob
 from src.ignore import ignore_filter
 from src.json_tool import json_tool
+from src.time_utils import convert_to_datetime
 
 MAX_RUN = 4
 
@@ -30,13 +31,6 @@ class TimeFilter:
         for data in input_tuples:
             if data[-1] >= self._start_time and data[-1] < self._end_time:
                 yield data
-
-
-def convert_to_datetime(t):
-    try:
-        return datetime.strptime(t, "%Y-%m-%dT%H:%M:%S.%fZ")
-    except:
-        return datetime.strptime(t, "%Y-%m-%dT%H:%M:%SZ")
 
 
 class MonthlyReleaseLoader:

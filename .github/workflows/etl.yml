@@ -115,61 +115,6 @@ jobs:
           MERGE_RETRY_SLEEP: "60000"
           MERGE_REQUIRED_APPROVALS: "0"
           PULL_REQUEST: "${{ steps.pr_jsons.outputs.pull-request-number }}"
-      - name: 'Upload Control Table Change Log - append'
-        uses: actions/upload-artifact@v3
-        with:
-          name: "append_${{ matrix.alpha }}"
-          path: append.log
-          retention-days: 1
-      - name: 'Upload Control Table Change Log - delete'
-        uses: actions/upload-artifact@v3
-        with:
-          name: "delete_${{ matrix.alpha }}"
-          path: delete.log
-          retention-days: 1
-  apply_control_table_change:
-    name: Apply Change to Control Table
-    needs: update_latest_json
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout 
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          ref: 'main'
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: github.com
-      - name: Set Up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Run install
-        run: |
-          pip install requests==2.28.2
-      - name: Download Change Files
-        uses: actions/download-artifact@v3
-        with:
-          path: control_change_log
-      - name: Update Control Table
-        run: python update_control_table.py 20 control_change_log data/latest.control
-      - name: Git commit
-        run: |
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
-          git add data/latest.control
-          git diff-index --quiet HEAD || git commit -m 'update: control table'
-      - name: Git pull
-        run: |
-          git config --global user.email "jeffrey82221@gmail.com"
-          git config --global user.name "jeffrey82221"
-          git config --global http.postBuffer 1048576000
-          git config pull.rebase false
-          git pull origin main || echo 'pull failed'
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PERSONAL_TOKEN }}
-          branch: main
   update_release_time:
     name: Do Release Time Table ETL
     needs: apply_control_table_change

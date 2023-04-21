@@ -9,6 +9,7 @@ import subprocess
 import pprint
 from functools import lru_cache
 import time
+from src.time_utils import convert_to_datetime
 from src.json_tool import json_tool
 
 CONTROL_TABLE_PATH = "/tmp/latest.control"
@@ -30,10 +31,6 @@ class Logger:
             f.write(", ".join(map(str, args)) + "\n")
 
 
-delete_logger = Logger("delete.log")
-append_logger = Logger("append.log")
-
-
 class UpdateController:
     def __init__(
         self, control_table_path="controller.csv", download_path="data/latest"
@@ -44,27 +41,23 @@ class UpdateController:
 
     def update(self, pkg_name):
         if self.already_download(pkg_name):
-            if self.get_offline_release_count(pkg_name) < self.get_online_release_count(
+            if self.get_online_max_release_time(
                 pkg_name
-            ):
+            ) > self.get_offline_max_release_time(pkg_name):
                 latest = self.download_latest(pkg_name)
                 json_tool.dump(f"{self._download_path}/{pkg_name}.json", latest)
-                release_cnt = self.get_online_release_count(pkg_name)
-                self.update_release_count(pkg_name, release_cnt)
+                time = self.get_online_max_release_time(pkg_name)
+                self.update_release(pkg_name, time)
         else:
             latest = self.download_latest(pkg_name)
             json_tool.dump(f"{self._download_path}/{pkg_name}.json", latest)
-            release_cnt = self.get_online_release_count(pkg_name)
-            self.update_release_count(pkg_name, release_cnt)
+            time = self.get_online_max_release_time(pkg_name)
+            self.update_release(pkg_name, time)
 
     def assert_update(self, pkg_name):
-        offline_cnt = self.get_offline_release_count(pkg_name)
-        online_cnt = self.get_online_release_count(pkg_name)
-        assert (
-            offline_cnt == online_cnt
-        ), f"{pkg_name} has inconsistent release count. online: {online_cnt}; offline: {offline_cnt}"
-        latest = json_tool.load(f"{self._download_path}/{pkg_name}.json")
-        assert latest == self.download_latest(pkg_name), f"{pkg_name} not identical"
+        assert self.get_online_max_release_time(
+            pkg_name
+        ) == self.get_offline_max_release_time(pkg_name)
 
     @staticmethod
     def create_file(path):
@@ -73,11 +66,28 @@ class UpdateController:
                 pass
 
     def get_offline_release_count(self, pkg_name):
-        if self.already_download(pkg_name):
-            output = self._get_control_search_result(pkg_name)
-            return int(output.split(b",")[-1].strip())
-        else:
-            return 0
+        result = json_tool.load(f"{self._download_path}/{pkg_name}.json")
+        return UpdateController.extract_max_time(result)
+
+    def get_online_max_release_time(self, pkg_name):
+        result = self.download_latest(pkg_name)
+        return UpdateController.extract_max_time(result)
+
+    @staticmethod
+    def extract_max_time(result):
+        times = []
+        for releases_content in result["releases"].values():
+            for content in releases_content:
+                times.append(convert_to_datetime(content["upload_time_iso_8601"]))
+        return max(times)
+
+    def get_offline_max_release_time(self, pkg_name):
+        result = self.download_latest(pkg_name)
+        times = []
+        for releases_content in result["releases"].values():
+            for content in releases_content:
+                times.append(convert_to_datetime(content["upload_time_iso_8601"]))
+        return max(times)
 
     def already_download(self, pkg_name):
         output = self._get_control_search_result(pkg_name)
@@ -87,12 +97,11 @@ class UpdateController:
         result = self.download_latest(pkg_name)
         return len(result["releases"].keys())
 
-    def update_release_count(self, pkg_name, count):
+    def update_release(self, pkg_name, time):
         if self.already_download(pkg_name):
             self._delete_line(pkg_name)
-        self._append_line(pkg_name, count)
+        self._append_line(pkg_name, time)
 
-    @delete_logger.apply
     def _delete_line(self, pkg_name):
         line_str = self._get_control_search_result(pkg_name)
         random_tmp_file = f"/tmp/{str(random.randint(0,10**30))}.csv"
@@ -102,10 +111,9 @@ class UpdateController:
         os.remove(self._path)
         os.rename(random_tmp_file, self._path)
 
-    @append_logger.apply
-    def _append_line(self, pkg_name, count):
+    def _append_line(self, pkg_name, time):
         with open(self._path, "a") as f:
-            f.write(f"{pkg_name}, {count}\n")
+            f.write(f"{pkg_name}, {time}\n")
 
     def _get_control_search_result(self, pkg_name):
         output = subprocess.run(
