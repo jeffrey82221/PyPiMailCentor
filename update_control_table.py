@@ -9,7 +9,8 @@ def yeild_append(total, src_path):
         if os.path.exists(fn):
             with open(fn, "r") as f:
                 for pkg in f:
-                    yield pkg.strip()
+                    a, b = pkg.strip().split(',')
+                    yield a.strip(), b.strip()
         else:
             print(fn, "does not exist")
 
@@ -31,8 +32,8 @@ def update(total, src_path, target_path):
         controller._delete_line(pkg)
         print("delete", pkg)
     print("Done Delete")
-    for line in yeild_append(total, src_path):
-        controller._append_line(line)
+    for pkg, count in yeild_append(total, src_path):
+        controller._append_line(pkg, count)
         print("append", pkg)
     print("Done Append")
 
