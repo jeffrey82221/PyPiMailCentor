@@ -10,7 +10,7 @@ def yield_append(total, src_path):
             with open(fn, "r") as f:
                 for pkg in f:
                     a, b = pkg.strip().split(',')
-                    yield a.strip(), b.strip()
+                    yield a.strip(), int(b.strip())
         else:
             print(fn, "does not exist")
 
