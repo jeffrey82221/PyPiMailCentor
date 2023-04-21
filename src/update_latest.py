@@ -12,8 +12,6 @@ import time
 from src.time_utils import convert_to_datetime
 from src.json_tool import json_tool
 
-CONTROL_TABLE_PATH = "/tmp/latest.control"
-
 
 class Logger:
     def __init__(self, log_path):
@@ -32,11 +30,7 @@ class Logger:
 
 
 class UpdateController:
-    def __init__(
-        self, control_table_path="controller.csv", download_path="data/latest"
-    ):
-        UpdateController.create_file(control_table_path)
-        self._path = control_table_path
+    def __init__(self, download_path="data/latest"):
         self._download_path = download_path
 
     def update(self, pkg_name):
@@ -75,10 +69,12 @@ class UpdateController:
 
     @staticmethod
     def extract_max_time(result):
+        assert "releases" in result and len(result["releases"])
         times = []
         for releases_content in result["releases"].values():
             for content in releases_content:
                 times.append(convert_to_datetime(content["upload_time_iso_8601"]))
+        assert len(times) > 0
         return max(times)
 
     def get_offline_max_release_time(self, pkg_name):
@@ -90,8 +86,7 @@ class UpdateController:
         return max(times)
 
     def already_download(self, pkg_name):
-        output = self._get_control_search_result(pkg_name)
-        return len(output) > 0
+        return os.path.exists(f"data/latest/{pkg_name}.json")
 
     def get_online_release_count(self, pkg_name):
         result = self.download_latest(pkg_name)
@@ -102,27 +97,12 @@ class UpdateController:
             self._delete_line(pkg_name)
         self._append_line(pkg_name, time)
 
-    def _delete_line(self, pkg_name):
-        line_str = self._get_control_search_result(pkg_name)
-        random_tmp_file = f"/tmp/{str(random.randint(0,10**30))}.csv"
-        UpdateController.create_file(random_tmp_file)
-        assert os.path.exists(random_tmp_file)
-        subprocess.run(["sed", f"'/{line_str}/d'", self._path, ">>", random_tmp_file])
-        os.remove(self._path)
-        os.rename(random_tmp_file, self._path)
-
-    def _append_line(self, pkg_name, time):
-        with open(self._path, "a") as f:
-            f.write(f"{pkg_name}, {time}\n")
-
-    def _get_control_search_result(self, pkg_name):
-        output = subprocess.run(
-            ["grep", f"^{pkg_name},", self._path], capture_output=True
-        ).stdout
-        return output
-
     def downloadable(self, pkg_name):
-        return "releases" in self.download_latest(pkg_name)
+        try:
+            self.get_online_max_release_time(pkg_name)
+            return "releases" in self.download_latest(pkg_name)
+        except AssertionError:
+            return False
 
     @lru_cache
     def download_latest(self, pkg_name):
@@ -143,7 +123,7 @@ class UpdateController:
 
 
 def update(pkg_name):
-    controller = UpdateController(CONTROL_TABLE_PATH)
+    controller = UpdateController()
     if controller.downloadable(pkg_name):
         controller.update(pkg_name)
         controller.assert_update(pkg_name)
