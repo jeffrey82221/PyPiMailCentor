@@ -5,11 +5,12 @@ Automatically sending report about python packages for python developers. This i
 
 # Goal: 
 
-- [ ] link prediction (whether dependency would emerge between two package)
-- [ ] node prediction (whether a package would continue to upgrade in the near future)
+- [ ] Capture link between packages, between package and contributors, between contributors and organizations. 
+- [ ] Link prediction (whether dependency would emerge between two package)
+- [ ] node prediction (whether a package would continue to upgrade in the near future, whether a package would switch from pure-python to hybrid language)
 
 # Plan:
-- [ ] Generate Edge.csv of every month. 
+
 - [ ] Mailing package list ordered by popularity, along with package name, github repo url, company, and licenses. 
     - [ ] Github Repo Url: check info->project_urls of latest jsons for github urls
     - [ ] License: check info->license
@@ -21,6 +22,12 @@ Automatically sending report about python packages for python developers. This i
         - [ ] Get repo contributors and their organization:
             - 1. list contributors REF: https://tryapis.com/github/api/repos-list-contributors
             - 2. extract organization from contributors REF: https://tryapis.com/github/api/orgs-list-for-user
+        - [ ] Get email using:
+            REF: https://nelson.cloud/scrape-contributor-emails-from-any-git-repository/
+            git shortlog -sea | grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" | awk '{print tolower($0)}' | sort | uniq | grep -wv 'users.noreply.github.com'
+- [ ] Generate Edge.csv of every month. 
+    - [ ] Link between packages based on dependency of releases (link will persist)
+    - [ ] Link between packages and contributors (link with persist)
 
 # Done: 
 - [X] Move here the ETL workflow from Pypi_Web_Crawl
