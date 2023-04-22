@@ -40,13 +40,9 @@ class UpdateController:
             ) > self.get_offline_max_release_time(pkg_name):
                 latest = self.download_latest(pkg_name)
                 json_tool.dump(f"{self._download_path}/{pkg_name}.json", latest)
-                time = self.get_online_max_release_time(pkg_name)
-                self.update_release(pkg_name, time)
         else:
             latest = self.download_latest(pkg_name)
             json_tool.dump(f"{self._download_path}/{pkg_name}.json", latest)
-            time = self.get_online_max_release_time(pkg_name)
-            self.update_release(pkg_name, time)
 
     def assert_update(self, pkg_name):
         assert self.get_online_max_release_time(
@@ -91,11 +87,6 @@ class UpdateController:
     def get_online_release_count(self, pkg_name):
         result = self.download_latest(pkg_name)
         return len(result["releases"].keys())
-
-    def update_release(self, pkg_name, time):
-        if self.already_download(pkg_name):
-            self._delete_line(pkg_name)
-        self._append_line(pkg_name, time)
 
     def downloadable(self, pkg_name):
         try:
