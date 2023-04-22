@@ -11,20 +11,20 @@ Automatically sending report about python packages for python developers. This i
 
 # Plan:
 
-- [ ] Mailing package list ordered by popularity, along with package name, github repo url, company, and licenses. 
-    - [ ] Github Repo Url: check info->project_urls of latest jsons for github urls
-    - [ ] License: check info->license
-    - [ ] Popularity: use github api to get Star count. 
+
+- [ ] Important info ETL
+    - [ ] 1a. Get author, author_email, maintainer, maintainer_email
+    - [ ] 1b. Github Repo Url: check info->project_urls of latest jsons for github ur
+    - [ ] 2. Popularity: use github api to get Star count. (only select the most popular 10000 packages)
         - [ ] Ref: https://tryapis.com/github/api/activity-list-stargazers-for-repo
-    - [ ] Company: 
-        - [ ] Get company info from emails from latest json
-            - aka. author, author_email, maintainer, maintainer_email
-        - [ ] Get repo contributors and their organization:
-            - 1. list contributors REF: https://tryapis.com/github/api/repos-list-contributors
-            - 2. extract organization from contributors REF: https://tryapis.com/github/api/orgs-list-for-user
-        - [ ] Get email using:
-            REF: https://nelson.cloud/scrape-contributor-emails-from-any-git-repository/
-            git shortlog -sea | grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" | awk '{print tolower($0)}' | sort | uniq | grep -wv 'users.noreply.github.com'
+    - [ ] 3a. License: check info->license or from github repo.
+    - [ ] 3b. Get repo contributors and their organization:
+        - 1. list contributors REF: https://tryapis.com/github/api/repos-list-contributors
+        - 2. extract organization from contributors REF: https://tryapis.com/github/api/orgs-list-for-user
+    - [ ] 4. Get email using:
+        REF: https://nelson.cloud/scrape-contributor-emails-from-any-git-repository/
+        git shortlog -sea | grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" | awk '{print tolower($0)}' | sort | uniq | grep -wv 'users.noreply.github.com'
+- [ ] Mailing package list ordered by popularity, along with package name, github repo url, company, and licenses. 
 - [ ] Generate Edge.csv of every month. 
     - [ ] Link between packages based on dependency of releases (link will persist)
     - [ ] Link between packages and contributors (link with persist)
