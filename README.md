@@ -9,7 +9,10 @@ Automatically sending report about python packages for python developers. This i
 - [ ] node prediction (whether a package would continue to upgrade in the near future)
 
 # Plan:
+- [ ] Generate Edge.csv of every month. 
+- [ ] Mailing package list ordered by download count, along with package name, github repo url, maintainer urls, and licenses. 
 
+# Done: 
 - [X] Move here the ETL workflow from Pypi_Web_Crawl
 - [X] Refactor: extract the json loading and saving core 
 - [X] Add decryption and encryption to the json loading and saving core
@@ -17,10 +20,9 @@ Automatically sending report about python packages for python developers. This i
 - [X] Refactor: rename `check_schema.yml` to `check_latest_schema.yml`
 - [X] Add a release online sampling module and build another `check_release_schema.yml` workflow
 - [X] Add monthly run workflow for `update_release_time.py`.
-- [ ] Debug: JSkiner - pyo3_runtime.PanicException: There should not be Union in Union
+- [X] Debug: JSkiner - pyo3_runtime.PanicException: There should not be Union in Union
 - [X] Connect all ETL together at etl.yml (do it everyday monday noon. update package_name -> update latest -> update release time). 
 - [X] Using auto PR instead of branch merging 
 - [X] Connect check schema together at check.yml (do it everyday midnight.) 
-- [-] Using fast checkout with workspace in the same workspace. 
 - [X] Using line-by-line encryption to avoid change of full json file.
-- [ ] Generate Edge.csv & Node.csv of every month. 
+
