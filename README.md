@@ -10,7 +10,17 @@ Automatically sending report about python packages for python developers. This i
 
 # Plan:
 - [ ] Generate Edge.csv of every month. 
-- [ ] Mailing package list ordered by download count, along with package name, github repo url, maintainer urls, and licenses. 
+- [ ] Mailing package list ordered by popularity, along with package name, github repo url, company, and licenses. 
+    - [ ] Github Repo Url: check info->project_urls of latest jsons for github urls
+    - [ ] License: check info->license
+    - [ ] Popularity: use github api to get Star count. 
+        - [ ] Ref: https://tryapis.com/github/api/activity-list-stargazers-for-repo
+    - [ ] Company: 
+        - [ ] Get company info from emails from latest json
+            - aka. author, author_email, maintainer, maintainer_email
+        - [ ] Get repo contributors and their organization:
+            - 1. list contributors REF: https://tryapis.com/github/api/repos-list-contributors
+            - 2. extract organization from contributors REF: https://tryapis.com/github/api/orgs-list-for-user
 
 # Done: 
 - [X] Move here the ETL workflow from Pypi_Web_Crawl
