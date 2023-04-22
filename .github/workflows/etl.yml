@@ -1,7 +1,7 @@
 name: ETL
-on:
-  schedule:
-    - cron: "0 0 * * *"
+on: push
+  #schedule:
+  #  - cron: "0 0 * * *"
 jobs:
   update_package_names:
     runs-on: ubuntu-latest
@@ -82,7 +82,6 @@ jobs:
           git config --global user.name "jeffrey82221"
           git config --global user.email "jeffrey82221@gmail.com"
           git add data/latest/
-          git add data/latest.control
           git diff-index --quiet HEAD || git commit -m 'update: package latest json'
       - name: Push - Jsons
         uses: ad-m/github-push-action@master
