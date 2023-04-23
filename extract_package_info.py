@@ -5,9 +5,10 @@ source: data/latest
 target: data/package_info.json
 
 Refactor: 
-- [ ] Build Registered Pipeline
-    - [ ] Unit: extract method + transform method + target_field_name
-    - [ ] Ordering: start: get_data >> filter: has_info >> map: [unit1, unit2, unit3] >> map: [unit4, unit5, unit6] >> filter: xxx
+- [X] Build Registered Pipeline
+    - [X] Unit: extract method + transform method + target_field_name
+    - [X] Ordering: start: get_data >> filter: has_info >> map: [unit1, unit2, unit3] >> map: [unit4, unit5, unit6] >> filter: xxx
+- [ ] Think about how to debug the pipeline on each node. 
 - [ ] Run pipeline using multi-thread map
 """
 import os
@@ -18,7 +19,9 @@ import re
 import requests
 import typing
 from toolz import curry
+from toolz import curried
 from toolz.functoolz import pipe
+from concurrent.futures import ThreadPoolExecutor
 from src.json_tool import json_tool
 
 
@@ -76,17 +79,22 @@ def field_wise_transformation(
 ):
     result = dict()
     for field, func in transforms.items():
-        result[field] = func
+        result[field] = func(data)
     return result
+
+
+def field_wise_enrichment(transforms: typing.Dict[str, typing.Callable], data: dict):
+    for field, func in transforms.items():
+        data[field] = func(data)
+    return data
 
 
 def do_etl(src_path, target_path):
     results = pipe(
         generate_file_names(src_path),
-        curry(map, curry(load_data)(src_path)),
-        curry(filter, lambda x: x is not None and "info" in x),
-        curry(
-            map,
+        curried.map(curry(load_data)(src_path)),
+        curried.filter(lambda x: x is not None and "info" in x),
+        curried.map(
             curry(field_wise_transformation)(
                 {
                     "name": lambda x: x["info"]["name"],
@@ -99,6 +107,11 @@ def do_etl(src_path, target_path):
                     ),
                 }
             ),
+        ),
+        curried.map(
+            curry(field_wise_enrichment)(
+                {"stars": lambda x: get_star_count(x["github_urls"])}
+            )
         ),
         list,
     )
