@@ -21,6 +21,7 @@ Automatically sending report about python packages for python developers. This i
     - [ ] 3b. Get repo contributors and their organization:
         - 1. list contributors REF: https://tryapis.com/github/api/repos-list-contributors
         - 2. extract organization from contributors REF: https://tryapis.com/github/api/orgs-list-for-user
+- [ ] Contributor ETL
     - [ ] 4. Get email using:
         REF: https://nelson.cloud/scrape-contributor-emails-from-any-git-repository/
         git shortlog -sea | grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" | awk '{print tolower($0)}' | sort | uniq | grep -wv 'users.noreply.github.com'
