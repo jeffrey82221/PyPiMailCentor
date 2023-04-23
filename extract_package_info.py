@@ -8,8 +8,9 @@ Refactor:
 - [X] Build Registered Pipeline
     - [X] Unit: extract method + transform method + target_field_name
     - [X] Ordering: start: get_data >> filter: has_info >> map: [unit1, unit2, unit3] >> map: [unit4, unit5, unit6] >> filter: xxx
+- Fix: rate limit. When using GITHUB_TOKEN , the rate limit is 1,000 requests per hour per repository.
 - [ ] Think about how to debug the pipeline on each node. 
-- [ ] Run pipeline using multi-thread map
+- [-] Run pipeline using multi-thread map
 """
 import os
 import tqdm
@@ -21,7 +22,7 @@ import typing
 from toolz import curry
 from toolz import curried
 from toolz.functoolz import pipe
-from concurrent.futures import ThreadPoolExecutor
+from multiprocessing.dummy import Pool
 from src.json_tool import json_tool
 
 
@@ -55,6 +56,8 @@ def get_star_count(github_urls):
         ).json()
         if isinstance(data, list):
             star_count_list.append(len(data))
+        else:
+            print(data)
     if star_count_list:
         return sum(star_count_list)
     else:
@@ -89,7 +92,15 @@ def field_wise_enrichment(transforms: typing.Dict[str, typing.Callable], data: d
     return data
 
 
+def verbose(pipe):
+    for i, data in enumerate(pipe):
+        print(i)
+        pprint.pprint(data)
+        yield data
+
+
 def do_etl(src_path, target_path):
+    p = Pool(3)
     results = pipe(
         generate_file_names(src_path),
         curried.map(curry(load_data)(src_path)),
@@ -108,11 +119,7 @@ def do_etl(src_path, target_path):
                 }
             ),
         ),
-        curried.map(
-            curry(field_wise_enrichment)(
-                {"stars": lambda x: get_star_count(x["github_urls"])}
-            )
-        ),
+        # verbose,
         list,
     )
     json_tool.dump(target_path, results)
@@ -123,4 +130,3 @@ if __name__ == "__main__":
     TARGET_PATH = "data/package_info.json"
     do_etl(SRC_PATH, TARGET_PATH)
     results = json_tool.load(TARGET_PATH)
-    pprint.pprint(list(filter(lambda x: isinstance(x["stars"], int), results)))
