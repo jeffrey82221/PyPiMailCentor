@@ -13,8 +13,8 @@ Automatically sending report about python packages for python developers. This i
 
 
 - [ ] Important info ETL
-    - [ ] 1a. Get author, author_email, maintainer, maintainer_email
-    - [ ] 1b. Github Repo Url: check info->project_urls of latest jsons for github ur
+    - [X] 1a. Get author, author_email, maintainer, maintainer_email
+    - [X] 1b. Github Repo Url: check info->project_urls of latest jsons for github ur
     - [ ] 2. Popularity: use github api to get Star count. (only select the most popular 10000 packages)
         - [ ] Ref: https://tryapis.com/github/api/activity-list-stargazers-for-repo
     - [ ] 3a. License: check info->license or from github repo.
