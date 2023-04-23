@@ -16,17 +16,17 @@ import pprint
 import binascii
 import re
 import requests
+import typing
+from toolz import curry
+from toolz.functoolz import pipe
 from src.json_tool import json_tool
-
-
-regex = r"https?:\/\/github\.com\/[\w-]+\/[\w-]+(?:\.git)?\/?"
 
 
 def take_github_urls(project_urls):
     if isinstance(project_urls, dict):
         result = []
         for url in project_urls.values():
-            if re.match(regex, url):
+            if re.match(r"https?:\/\/github\.com\/[\w-]+\/[\w-]+(?:\.git)?\/?", url):
                 if url.count("/") > 4:
                     url = "/".join(url.split("/")[:5])
                 url = url.replace("http://github.com", "https://github.com")
@@ -41,12 +41,15 @@ def take_github_urls(project_urls):
     else:
         return []
 
+
 def get_star_count(github_urls):
     star_count_list = []
     for url in github_urls:
-        owner = url.split('/')[3]
-        repo = url.split('/')[4]
-        data = requests.get(f'https://api.github.com/repos/{owner}/{repo}/stargazers').json()
+        owner = url.split("/")[3]
+        repo = url.split("/")[4]
+        data = requests.get(
+            f"https://api.github.com/repos/{owner}/{repo}/stargazers"
+        ).json()
         if isinstance(data, list):
             star_count_list.append(len(data))
     if star_count_list:
@@ -54,27 +57,51 @@ def get_star_count(github_urls):
     else:
         return None
 
-def do_etl(src_path, target_path):
-    src_files = sorted(filter(lambda x: ".json" in x, os.listdir(src_path)))
 
-    results = []
-    for fn in tqdm.tqdm(src_files):
-        result = dict()
-        try:
-            data = json_tool.load(f"{src_path}/{fn}")
-            result["name"] = data["info"]["name"]
-            result["author"] = data["info"]["author"]
-            result["author_email"] = data["info"]["author_email"]
-            result["maintainer"] = data["info"]["maintainer"]
-            result["maintainer_email"] = data["info"]["maintainer_email"]
-            result["github_urls"] = take_github_urls(data["info"]["project_urls"])
-            result["stars"] = get_star_count(result['github_urls'])
-            results.append(result)
-        except binascii.Error:
-            print("skip", fn)
-        except KeyError:
-            print("skip", fn, "due to invalid data fields:")
-            print(data.keys())
+def generate_file_names(src_path):
+    src_files = sorted(filter(lambda x: ".json" in x, os.listdir(src_path)))
+    return tqdm.tqdm(src_files)
+
+
+def load_data(src_path, fn):
+    try:
+        return json_tool.load(f"{src_path}/{fn}")
+    except binascii.Error:
+        print("skip", fn)
+        return None
+
+
+def field_wise_transformation(
+    transforms: typing.Dict[str, typing.Callable], data: dict
+):
+    result = dict()
+    for field, func in transforms.items():
+        result[field] = func
+    return result
+
+
+def do_etl(src_path, target_path):
+    results = pipe(
+        generate_file_names(src_path),
+        curry(map, curry(load_data)(src_path)),
+        curry(filter, lambda x: x is not None and "info" in x),
+        curry(
+            map,
+            curry(field_wise_transformation)(
+                {
+                    "name": lambda x: x["info"]["name"],
+                    "author": lambda x: x["info"]["author"],
+                    "author_email": lambda x: x["info"]["author_email"],
+                    "maintainer": lambda x: x["info"]["maintainer"],
+                    "maintainer_email": lambda x: x["info"]["maintainer_email"],
+                    "github_urls": lambda x: take_github_urls(
+                        x["info"]["project_urls"]
+                    ),
+                }
+            ),
+        ),
+        list,
+    )
     json_tool.dump(target_path, results)
 
 
