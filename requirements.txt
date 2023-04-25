@@ -8,3 +8,4 @@ requests==2.28.2
 JSkiner
 pandas==1.4.2
 pyarrow==8.0.0
+pypistats==1.1.0

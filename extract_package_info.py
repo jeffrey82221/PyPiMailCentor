@@ -9,8 +9,22 @@ Refactor:
     - [X] Unit: extract method + transform method + target_field_name
     - [X] Ordering: start: get_data >> filter: has_info >> map: [unit1, unit2, unit3] >> map: [unit4, unit5, unit6] >> filter: xxx
 - Fix: rate limit. When using GITHUB_TOKEN , the rate limit is 1,000 requests per hour per repository.
-- [ ] Think about how to debug the pipeline on each node. 
-- [-] Run pipeline using multi-thread map
+- [X] Think about how to debug the pipeline on each node. 
+- [ ] Refactor: 
+    - [ ] Save latest json file names into latest.menu
+    - [ ] Move the following segment  in update_all.py to update_all.py and update_latest.py
+        as do_etl
+        ```
+        # Do update
+        with open(f"{SPLIT_PATH}/{file}", "r") as f:
+            pkgs = list(map(lambda x: x.strip(), f))
+            for pkg in tqdm.tqdm(pkgs, desc=f"{pkgs[0]}~{pkgs[-1]}"):
+                update(pkg)
+        ```
+    - [ ] Enable update_all.py to take SRC_PATH as input
+    - [ ] Move extract_package_info.py to src/ and rename as update_mailing_content.py
+    - [ ] Apply update_all.py to `do_etl` of update_mailing_content.py 
+- [ ] Feature: Run crawling using multiple github action jobs (for speed up.)
 """
 import os
 import tqdm
@@ -22,8 +36,15 @@ import typing
 from toolz import curry
 from toolz import curried
 from toolz.functoolz import pipe
+from functools import partial
+import pypistats
 from multiprocessing.dummy import Pool
+import json
+from httpx import HTTPStatusError
+import time
 from src.json_tool import json_tool
+
+TARGET_PATH = "data/package_info.json"
 
 
 def take_github_urls(project_urls):
@@ -66,7 +87,7 @@ def get_star_count(github_urls):
 
 def generate_file_names(src_path):
     src_files = sorted(filter(lambda x: ".json" in x, os.listdir(src_path)))
-    return tqdm.tqdm(src_files)
+    return src_files
 
 
 def load_data(src_path, fn):
@@ -99,10 +120,33 @@ def verbose(pipe):
         yield data
 
 
-def do_etl(src_path, target_path):
-    p = Pool(3)
+def get_180days_download_count(pkg_name, max_try=10):
+    result = None
+    for i in range(max_try):
+        try:
+            json_str = pypistats.overall(pkg_name, format="json")
+            wm_data, wom_data = json.loads(json_str)["data"]
+            result = wm_data["downloads"] + wom_data["downloads"]
+            break
+        except HTTPStatusError as e:
+            if e.response.status_code == 404:
+                break
+            elif e.response.status_code == 429:
+                time.sleep(i * 5)
+                if i < max_try:
+                    continue
+                else:
+                    raise e
+            else:
+                raise e
+    return result
+
+
+def do_etl(src_path):
+    p = Pool(8)
     results = pipe(
         generate_file_names(src_path),
+        tqdm.tqdm,
         curried.map(curry(load_data)(src_path)),
         curried.filter(lambda x: x is not None and "info" in x),
         curried.map(
@@ -113,20 +157,37 @@ def do_etl(src_path, target_path):
                     "author_email": lambda x: x["info"]["author_email"],
                     "maintainer": lambda x: x["info"]["maintainer"],
                     "maintainer_email": lambda x: x["info"]["maintainer_email"],
+                    "license": lambda x: x["info"]["license"],
                     "github_urls": lambda x: take_github_urls(
                         x["info"]["project_urls"]
                     ),
                 }
             ),
         ),
-        # verbose,
+        curried.filter(
+            lambda x: len(x["github_urls"]) > 0
+            and isinstance(x["license"], str)
+            and len(x["license"]) > 0
+        ),
+        curry(map)(  # partial(p.imap, chunksize=10)
+            curry(field_wise_enrichment)(
+                {
+                    "downloads": lambda x: partial(
+                        get_180days_download_count, max_try=20
+                    )(x["name"])
+                }
+            )
+        ),
+        verbose,
+        curried.filter(
+            lambda x: x["downloads"] is not None and x["downloads"] > 100000
+        ),
         list,
     )
-    json_tool.dump(target_path, results)
+    json_tool.dump(TARGET_PATH, results)
 
 
 if __name__ == "__main__":
     SRC_PATH = "data/latest"
-    TARGET_PATH = "data/package_info.json"
-    do_etl(SRC_PATH, TARGET_PATH)
+    do_etl(SRC_PATH)
     results = json_tool.load(TARGET_PATH)
