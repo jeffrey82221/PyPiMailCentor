@@ -25,6 +25,28 @@ Refactor:
     - [ ] Move extract_package_info.py to src/ and rename as update_mailing_content.py
     - [ ] Apply update_all.py to `do_etl` of update_mailing_content.py 
 - [ ] Feature: Run crawling using multiple github action jobs (for speed up.)
+
+curried.filter(
+            lambda x: len(x["github_urls"]) > 0
+            and isinstance(x["license"], str)
+            and len(x["license"]) > 0
+            and isinstance(x['author'], str)
+            and len(x['author']) > 0
+            and isinstance(x['author_email'], str)
+            and len(x['author_email']) > 0
+        ),
+        curried.filter(
+            lambda x: '\n' not in x['license']
+        ),
+        curried.filter(
+            lambda x: 'http' not in x['license']
+        ),
+        curried.filter(
+            lambda x: ',' not in x['license']
+        ),
+        curried.filter(
+            lambda x: '\\x00' not in x['license']
+        ),
 """
 import os
 import tqdm
@@ -36,15 +58,12 @@ import typing
 from toolz import curry
 from toolz import curried
 from toolz.functoolz import pipe
-from functools import partial
 import pypistats
-from multiprocessing.dummy import Pool
 import json
+from functools import partial
 from httpx import HTTPStatusError
 import time
 from src.json_tool import json_tool
-
-TARGET_PATH = "data/package_info.json"
 
 
 def take_github_urls(project_urls):
@@ -142,8 +161,13 @@ def get_180days_download_count(pkg_name, max_try=10):
     return result
 
 
-def do_etl(src_path):
-    p = Pool(8)
+def append_line(target_path, data):
+    json_str = json.dumps(data, ensure_ascii=True)
+    with open(target_path, "a") as f:
+        f.write(json_str + "\n")
+
+
+def do_etl(src_path, target_path):
     results = pipe(
         generate_file_names(src_path),
         tqdm.tqdm,
@@ -154,9 +178,9 @@ def do_etl(src_path):
                 {
                     "name": lambda x: x["info"]["name"],
                     "author": lambda x: x["info"]["author"],
-                    "author_email": lambda x: x["info"]["author_email"],
+                    # "author_email": lambda x: x["info"]["author_email"],
                     "maintainer": lambda x: x["info"]["maintainer"],
-                    "maintainer_email": lambda x: x["info"]["maintainer_email"],
+                    # "maintainer_email": lambda x: x["info"]["maintainer_email"],
                     "license": lambda x: x["info"]["license"],
                     "github_urls": lambda x: take_github_urls(
                         x["info"]["project_urls"]
@@ -164,12 +188,8 @@ def do_etl(src_path):
                 }
             ),
         ),
-        curried.filter(
-            lambda x: len(x["github_urls"]) > 0
-            and isinstance(x["license"], str)
-            and len(x["license"]) > 0
-        ),
-        curry(map)(  # partial(p.imap, chunksize=10)
+        curried.filter(lambda x: len(x["github_urls"]) >= 1),
+        curried.map(
             curry(field_wise_enrichment)(
                 {
                     "downloads": lambda x: partial(
@@ -178,16 +198,14 @@ def do_etl(src_path):
                 }
             )
         ),
+        curried.filter(lambda x: x["downloads"] is not None and x["downloads"] > 1000),
         verbose,
-        curried.filter(
-            lambda x: x["downloads"] is not None and x["downloads"] > 100000
-        ),
+        curried.map(curry(append_line)(target_path)),
         list,
     )
-    json_tool.dump(TARGET_PATH, results)
 
 
 if __name__ == "__main__":
     SRC_PATH = "data/latest"
-    do_etl(SRC_PATH)
-    results = json_tool.load(TARGET_PATH)
+    TARGET_PATH = "data/package_info.jsonl"
+    do_etl(SRC_PATH, TARGET_PATH)
