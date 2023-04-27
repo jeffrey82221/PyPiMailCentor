@@ -12,7 +12,7 @@ Refactor:
 - [X] Think about how to debug the pipeline on each node. 
 - [ ] Refactor: 
     - [ ] Save latest json file names into latest.menu
-    - [ ] Move the following segment  in update_all.py to update_all.py and update_latest.py
+    - [ ] Move the following segment in update_all.py to update_all.py and update_latest.py
         as do_etl
         ```
         # Do update
@@ -193,7 +193,7 @@ def do_etl(src_path, target_path):
             curry(field_wise_enrichment)(
                 {
                     "downloads": lambda x: partial(
-                        get_180days_download_count, max_try=20
+                        get_180days_download_count, max_try=3
                     )(x["name"])
                 }
             )

@@ -3,7 +3,6 @@ Update JSON representing the latest status of a python package
 
 The package is listed in data/package_names.txt
 """
-import sys
 import os
 import subprocess
 import tqdm

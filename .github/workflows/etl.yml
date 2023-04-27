@@ -112,9 +112,40 @@ jobs:
           MERGE_RETRY_SLEEP: "60000"
           MERGE_REQUIRED_APPROVALS: "0"
           PULL_REQUEST: "${{ steps.pr_jsons.outputs.pull-request-number }}"
+  list_latest_json:
+    name: List the Downloaded Latest Json(s)
+    needs: update_latest_jsons
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ref: 'main'
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: github.com
+      - name: build_menu
+        run: ls data/latest/ >> data/latest.menu
+      - name: Git commit
+        run: |
+          git config --global user.name "jeffrey82221"
+          git config --global user.email "jeffrey82221@gmail.com"
+          git add data/latest.menu
+          git diff-index --quiet HEAD || git commit -m 'update: latest menu'
+      - name: Git pull
+        run: |
+          git config --global user.email "jeffrey82221@gmail.com"
+          git config --global user.name "jeffrey82221"
+          git config pull.rebase false
+          git pull origin main || echo 'pull failed'
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PERSONAL_TOKEN }}
+          branch: main
   update_release_time:
     name: Do Release Time Table ETL
-    needs: update_latest_jsons
+    needs: list_latest_json
     runs-on: ubuntu-latest
     steps:
       - name: checkout 
@@ -153,4 +184,4 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.PERSONAL_TOKEN }}
-          branch: main     
+          branch: main
