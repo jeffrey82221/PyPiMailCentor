@@ -76,7 +76,7 @@ jobs:
           git checkout -b update_latest/${{ matrix.alpha }}
           git push --set-upstream origin update_latest/${{ matrix.alpha }}
       - name: Run update script
-        run: python update_latest_all.py ${{ matrix.alpha }} ${{ matrix.split_cnt }}
+        run: python update_latest_all.py data/package_names.txt ${{ matrix.alpha }} ${{ matrix.split_cnt }}
       - name: Git Commit - Jsons
         run: |
           git config --global user.name "jeffrey82221"
@@ -92,7 +92,7 @@ jobs:
         id: pr_jsons
         uses: peter-evans/create-pull-request@v5
         with:
-          title: "Upload Latest Json(s) from update_latest/${{ matrix.alpha }}"
+          title: "Merge update_latest/${{ matrix.alpha }}"
           token: ${{ secrets.PERSONAL_TOKEN }}
           branch: update_latest/${{ matrix.alpha }}
           base: main
