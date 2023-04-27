@@ -1,10 +1,8 @@
 """
 Update releases json in data/releases folder
 """
-import json
 import glob
 import requests
-import re
 import os
 from src.ignore import ignore_filter
 from src.json_tool import json_tool, JsonTool

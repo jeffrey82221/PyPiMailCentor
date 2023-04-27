@@ -10,7 +10,7 @@ Refactor:
     - [X] Ordering: start: get_data >> filter: has_info >> map: [unit1, unit2, unit3] >> map: [unit4, unit5, unit6] >> filter: xxx
 - Fix: rate limit. When using GITHUB_TOKEN , the rate limit is 1,000 requests per hour per repository.
 - [X] Think about how to debug the pipeline on each node. 
-- [ ] Refactor: 
+- [X] Refactor: 
     - [X] Save latest json file names into latest.menu
     - [X] Move the following segment in update_all.py to update_all.py and update_latest.py
         as do_etl
@@ -25,28 +25,6 @@ Refactor:
     - [X] Move extract_package_info.py to src/ and rename as update_info.py
     - [X] Apply update_all.py to `update` of update_info.py
 - [ ] Feature: Run crawling using multiple github action jobs (for speed up.)
-
-curried.filter(
-            lambda x: len(x["github_urls"]) > 0
-            and isinstance(x["license"], str)
-            and len(x["license"]) > 0
-            and isinstance(x['author'], str)
-            and len(x['author']) > 0
-            and isinstance(x['author_email'], str)
-            and len(x['author_email']) > 0
-        ),
-        curried.filter(
-            lambda x: '\n' not in x['license']
-        ),
-        curried.filter(
-            lambda x: 'http' not in x['license']
-        ),
-        curried.filter(
-            lambda x: ',' not in x['license']
-        ),
-        curried.filter(
-            lambda x: '\\x00' not in x['license']
-        ),
 """
 import os
 import pprint

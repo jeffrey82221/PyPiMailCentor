@@ -5,7 +5,6 @@ The package is listed in data/package_names.txt
 """
 import os
 import subprocess
-import tqdm
 
 PATH = "data/package_names.txt"
 SPLIT_PATH = "tmp"

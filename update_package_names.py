@@ -10,7 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 
 PYPI_URL = "https://pypi.python.org/simple/"
-PATH = "data/package_names.txt"
+PATH = "data/package.menu"
 
 
 def download_pypi_package_names():
