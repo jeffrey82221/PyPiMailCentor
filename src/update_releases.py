@@ -8,7 +8,7 @@ import re
 import os
 from src.ignore import ignore_filter
 from src.json_tool import json_tool, JsonTool
-
+from src.etl_utils import loop_over
 
 class ReleaseUpdator:
     def __init__(self, target_path="data/releases", encrypt_save=True):
@@ -67,4 +67,4 @@ class ReleaseUpdator:
         print("\t\t", save_path, "saved")
 
 
-update = ReleaseUpdator().update
+update = loop_over(ReleaseUpdator().update)
