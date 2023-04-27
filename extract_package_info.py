@@ -11,7 +11,7 @@ Refactor:
 - Fix: rate limit. When using GITHUB_TOKEN , the rate limit is 1,000 requests per hour per repository.
 - [X] Think about how to debug the pipeline on each node. 
 - [ ] Refactor: 
-    - [ ] Save latest json file names into latest.menu
+    - [X] Save latest json file names into latest.menu
     - [ ] Move the following segment in update_all.py to update_all.py and update_latest.py
         as do_etl
         ```
@@ -104,9 +104,7 @@ def get_star_count(github_urls):
         return None
 
 
-def generate_file_names(src_path):
-    src_files = sorted(filter(lambda x: ".json" in x, os.listdir(src_path)))
-    return src_files
+
 
 
 def load_data(src_path, fn):
@@ -168,10 +166,11 @@ def append_line(target_path, data):
 
 
 def do_etl(src_path, target_path):
-    results = pipe(
-        generate_file_names(src_path),
-        tqdm.tqdm,
-        curried.map(curry(load_data)(src_path)),
+    pipe(
+        open(src_path, 'r'),
+        curried.map(lambda x: x.replace('\n', '')),
+        curried.filter(lambda x: ".json" in  x),
+        curried.map(curry(load_data)('data/latest')),
         curried.filter(lambda x: x is not None and "info" in x),
         curried.map(
             curry(field_wise_transformation)(
@@ -206,6 +205,6 @@ def do_etl(src_path, target_path):
 
 
 if __name__ == "__main__":
-    SRC_PATH = "data/latest"
+    SRC_PATH = "data/latest.menu"
     TARGET_PATH = "data/package_info.jsonl"
     do_etl(SRC_PATH, TARGET_PATH)
