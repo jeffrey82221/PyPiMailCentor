@@ -22,8 +22,8 @@ Refactor:
                 update(pkg)
         ```
     - [X] Enable update_all.py to take SRC_PATH as input
-    - [ ] Move extract_package_info.py to src/ and rename as update_mailing_content.py
-    - [ ] Apply update_all.py to `do_etl` of update_mailing_content.py 
+    - [X] Move extract_package_info.py to src/ and rename as update_info.py
+    - [X] Apply update_all.py to `update` of update_info.py
 - [ ] Feature: Run crawling using multiple github action jobs (for speed up.)
 
 curried.filter(
