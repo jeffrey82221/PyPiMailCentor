@@ -64,7 +64,7 @@ from httpx import HTTPStatusError
 import time
 from src.json_tool import json_tool
 
-TARGET_PATH = "/tmp/package_info.jsonl"
+TARGET_PATH = "/tmp/info.jsonl"
 
 def take_github_urls(project_urls):
     if isinstance(project_urls, dict):
