@@ -12,7 +12,7 @@ Refactor:
 - [X] Think about how to debug the pipeline on each node. 
 - [ ] Refactor: 
     - [X] Save latest json file names into latest.menu
-    - [ ] Move the following segment in update_all.py to update_all.py and update_latest.py
+    - [X] Move the following segment in update_all.py to update_all.py and update_latest.py
         as do_etl
         ```
         # Do update
@@ -21,7 +21,7 @@ Refactor:
             for pkg in tqdm.tqdm(pkgs, desc=f"{pkgs[0]}~{pkgs[-1]}"):
                 update(pkg)
         ```
-    - [ ] Enable update_all.py to take SRC_PATH as input
+    - [X] Enable update_all.py to take SRC_PATH as input
     - [ ] Move extract_package_info.py to src/ and rename as update_mailing_content.py
     - [ ] Apply update_all.py to `do_etl` of update_mailing_content.py 
 - [ ] Feature: Run crawling using multiple github action jobs (for speed up.)
@@ -49,7 +49,6 @@ curried.filter(
         ),
 """
 import os
-import tqdm
 import pprint
 import binascii
 import re
@@ -65,6 +64,7 @@ from httpx import HTTPStatusError
 import time
 from src.json_tool import json_tool
 
+TARGET_PATH = "/tmp/package_info.jsonl"
 
 def take_github_urls(project_urls):
     if isinstance(project_urls, dict):
@@ -159,13 +159,15 @@ def get_180days_download_count(pkg_name, max_try=10):
     return result
 
 
-def append_line(target_path, data):
+def append_line(data):
     json_str = json.dumps(data, ensure_ascii=True)
-    with open(target_path, "a") as f:
+    with open(TARGET_PATH, "a") as f:
         f.write(json_str + "\n")
 
 
-def do_etl(src_path, target_path):
+def update(src_path):
+    if os.path.exists(TARGET_PATH):
+        os.remove(TARGET_PATH)
     pipe(
         open(src_path, 'r'),
         curried.map(lambda x: x.replace('\n', '')),
@@ -199,12 +201,10 @@ def do_etl(src_path, target_path):
         ),
         curried.filter(lambda x: x["downloads"] is not None and x["downloads"] > 1000),
         verbose,
-        curried.map(curry(append_line)(target_path)),
+        curried.map(append_line),
         list,
     )
 
-
 if __name__ == "__main__":
     SRC_PATH = "data/latest.menu"
-    TARGET_PATH = "data/package_info.jsonl"
-    do_etl(SRC_PATH, TARGET_PATH)
+    update(SRC_PATH)
