@@ -1,5 +1,7 @@
 name: UpdateInfo
-on: push
+on: 
+  schedule:
+    - cron: "0 8 * * *"
 jobs:
   update_info:
     name: Extract Info and Update Download Count
