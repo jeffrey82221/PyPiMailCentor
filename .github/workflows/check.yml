@@ -25,10 +25,10 @@ jobs:
           pip install requests
       - name: Sample and Download Release Json
         run: |
-          python sample_n_download.py data/package_names.txt ./download 1000
+          python sample_n_download.py data/package.menu ./download 1000
       - name: Sample and Decrypt Latest Json
         run: |
-          python sample_n_decrypt.py data/latest ./decrypt 10000
+          python sample_n_decrypt.py data/latest ./decrypt 1000
       - name: Run JSkiner for Release Schema
         run: jskiner --in-path ./download --nworkers 2 --verbose true --out data/release.schema --batch-size 100 --cuckoo-path data/release.cuckoo --cuckoo-size 50000000 --cuckoo-fpr 0.1
       - name: Run JSkiner for Latest Schema

@@ -30,3 +30,34 @@ jobs:
           pip install httpx==0.23.0
       - name: Run update script
         run: python update_info_all.py data/latest.menu ${{ matrix.alpha }} ${{ matrix.split_cnt }}
+      - name: Upload Tmp Jsonl
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{ matrix.alpha }}"
+          path: /tmp/info.jsonl
+          retention-days: 1
+  merge_jsonl:
+    name: Merge Jsonl into 
+    needs: update_info
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout 
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ref: 'main'
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: github.com
+      - name: Set Up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Download Jsonls
+        uses: actions/download-artifact@v3
+        with:
+          path: download
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: download
+      - name: Display structure of current path
+        run: ls -R
