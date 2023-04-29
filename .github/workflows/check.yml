@@ -12,7 +12,7 @@ jobs:
         with:
           fetch-depth: 1
       - name: Set Up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.9'
       - name: Install package
