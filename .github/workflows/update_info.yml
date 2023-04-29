@@ -1,7 +1,7 @@
 name: UpdateInfo
-on: 
-  schedule:
-   - cron: "0 8 * * *"
+on: push
+  #schedule:
+   #- cron: "0 8 * * *"
 jobs:
   update_info:
     name: Extract Info and Update Download Count
@@ -19,7 +19,7 @@ jobs:
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-known-hosts: github.com
       - name: Set Up Python 
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.9'
       - name: Run install
@@ -50,10 +50,6 @@ jobs:
           ref: 'main'
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-known-hosts: github.com
-      - name: Set Up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
       - name: Download Jsonls
         uses: actions/download-artifact@v3
         with:
