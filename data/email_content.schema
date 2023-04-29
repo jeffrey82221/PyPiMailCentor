@@ -1,0 +1,10 @@
+Record(
+    {
+        "author": Optional(Atomic(Str())),
+        "downloads": Atomic(Int()),
+        "github_urls": Array(Atomic(Str())),
+        "license": Optional(Atomic(Str())),
+        "maintainer": Optional(Atomic(Str())),
+        "name": Atomic(Str()),
+    }
+)
