@@ -1,7 +1,7 @@
 name: UpdateInfo
-on: 
-  schedule:
-    - cron: "0 8 * * *"
+on: push 
+  #schedule:
+  #  - cron: "0 8 * * *"
 jobs:
   update_info:
     name: Extract Info and Update Download Count
@@ -61,5 +61,22 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: download
-      - name: Display structure of current path
-        run: ls -R
+      - name: Merge jsonl
+        run: cat download/{0..99}/info.jsonl >> data/email_content.jsonl
+      - name: Git commit
+        run: |
+          git config --global user.name "jeffrey82221"
+          git config --global user.email "jeffrey82221@gmail.com"
+          git add data/email_content.jsonl
+          git diff-index --quiet HEAD || git commit -m 'update: email content'
+      - name: Git pull
+        run: |
+          git config --global user.email "jeffrey82221@gmail.com"
+          git config --global user.name "jeffrey82221"
+          git config pull.rebase false
+          git pull origin main || echo 'pull failed'
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PERSONAL_TOKEN }}
+          branch: main

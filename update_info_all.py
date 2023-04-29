@@ -5,7 +5,7 @@ The package is listed in data/package_names.txt
 
 Source: data/latest.menu
 Tmp:  /tmp/info.jsonl
-Output: emailing_content.jsonl
+Output: email_content.jsonl
 """
 import sys
 from src.update_all import update_all

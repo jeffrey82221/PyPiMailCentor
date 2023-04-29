@@ -1,12 +1,11 @@
 """
 Update JSON representing the latest status of a python package
 
-The package is listed in data/package_names.txt
+The package is listed in data/package.menu
 """
 import os
 import subprocess
 
-PATH = "data/package_names.txt"
 SPLIT_PATH = "tmp"
 
 
