@@ -44,6 +44,7 @@ from src.json_tool import json_tool
 
 TARGET_PATH = "/tmp/info.jsonl"
 
+
 def take_github_urls(project_urls):
     if isinstance(project_urls, dict):
         result = []
@@ -80,9 +81,6 @@ def get_star_count(github_urls):
         return sum(star_count_list)
     else:
         return None
-
-
-
 
 
 def load_data(src_path, fn):
@@ -147,10 +145,10 @@ def update(src_path):
     if os.path.exists(TARGET_PATH):
         os.remove(TARGET_PATH)
     pipe(
-        open(src_path, 'r'),
-        curried.map(lambda x: x.replace('\n', '')),
-        curried.filter(lambda x: ".json" in  x),
-        curried.map(curry(load_data)('data/latest')),
+        open(src_path, "r"),
+        curried.map(lambda x: x.replace("\n", "")),
+        curried.filter(lambda x: ".json" in x),
+        curried.map(curry(load_data)("data/latest")),
         curried.filter(lambda x: x is not None and "info" in x),
         curried.map(
             curry(field_wise_transformation)(
@@ -182,6 +180,7 @@ def update(src_path):
         curried.map(append_line),
         list,
     )
+
 
 if __name__ == "__main__":
     SRC_PATH = "data/latest.menu"

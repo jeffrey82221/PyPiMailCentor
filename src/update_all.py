@@ -9,7 +9,6 @@ import subprocess
 SPLIT_PATH = "tmp"
 
 
-
 def update_all(update, src_path, index, split_cnt=10):
     """
     Args:
@@ -31,4 +30,4 @@ def update_all(update, src_path, index, split_cnt=10):
     print(f"split files: {files}")
     file = files[index]
     print(f"selected file: {file}")
-    update(src_path = f"{SPLIT_PATH}/{file}")
+    update(src_path=f"{SPLIT_PATH}/{file}")

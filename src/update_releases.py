@@ -8,6 +8,7 @@ from src.ignore import ignore_filter
 from src.json_tool import json_tool, JsonTool
 from src.etl_utils import loop_over
 
+
 class ReleaseUpdator:
     def __init__(self, target_path="data/releases", encrypt_save=True):
         self._target_path = target_path

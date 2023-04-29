@@ -11,6 +11,7 @@ from src.time_utils import convert_to_datetime
 from src.json_tool import json_tool
 from src.etl_utils import loop_over
 
+
 class Logger:
     def __init__(self, log_path):
         self._log_path = log_path
@@ -110,6 +111,7 @@ class UpdateController:
                 retry_cnt += 1
         return result
 
+
 @loop_over
 def update(pkg_name):
     controller = UpdateController()
@@ -119,7 +121,6 @@ def update(pkg_name):
     else:
         print(pkg_name, "not found:")
         pprint.pprint(controller.download_latest(pkg_name))
-
 
 
 if __name__ == "__main__":
