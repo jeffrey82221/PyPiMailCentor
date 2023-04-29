@@ -1,7 +1,7 @@
 name: Check Schema
-on: 
-  schedule:
-    - cron: "0 10 * * *"
+on: push
+  #schedule:
+    #- cron: "0 10 * * *"
 jobs:
   check_schema:
     name: Checking the Schema of Release Json(s)
@@ -41,10 +41,8 @@ jobs:
           git config --global user.email "jeffrey82221@gmail.com"
       - name: Commit Schema
         run: |
-          git add data/release.schema
-          git add data/release.cuckoo
-          git add data/latest.schema
-          git add data/latest.cuckoo
+          git add data/*.schema
+          git add data/*.cuckoo
           git diff-index --quiet HEAD || git commit -m 'update: schema'
       - name: Git pull
         run: |
