@@ -6,7 +6,6 @@ Source: /data/latest - the latest json files of packages
 Output: /data/release_time - the release time table for each package release seperated by month 
 """
 import os
-import json
 from datetime import datetime, timedelta
 import tqdm
 import pandas as pd

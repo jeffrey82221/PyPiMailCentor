@@ -2,11 +2,9 @@
 Sample and Download the Release Json Files before Infering the Schema
 """
 import sys
-import json
 import random
 import os
 import tqdm
-from src.json_tool import json_tool, JsonTool
 from src.update_releases import ReleaseUpdator
 
 

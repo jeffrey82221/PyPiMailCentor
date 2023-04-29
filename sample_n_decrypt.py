@@ -2,7 +2,6 @@
 Sample and Decrypt the Latest Json Files before Infering the Schema
 """
 import sys
-import json
 import random
 import os
 import tqdm
