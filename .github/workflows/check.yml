@@ -29,28 +29,25 @@ jobs:
       - name: Sample and Decrypt Latest Json
         run: |
           python sample_n_decrypt.py data/latest ./decrypt 1000
-      - name: Run JSkiner for Release Schema
+      - name: Detect schema for pypi release api output
         run: jskiner --in-path ./download --nworkers 2 --verbose true --out data/release.schema --batch-size 100 --cuckoo-path data/release.cuckoo --cuckoo-size 50000000 --cuckoo-fpr 0.1
-      - name: Run JSkiner for Latest Schema
+      - name: Detect schema for data/latest
         run: jskiner --in-path ./decrypt --nworkers 2 --verbose true --out data/latest.schema --batch-size 1000 --cuckoo-path data/latest.cuckoo --cuckoo-size 50000000 --cuckoo-fpr 0.1
+      - name: Detect schema for data/email_content.jsonl
+        run: jskiner --in-path data/email_content.jsonl --nworkers 2 --verbose true --out data/email_content.schema --split 1000 --split-path content_split/
       - name: Git Config
         run: |
           git config --global user.name "jeffrey82221"
           git config --global user.email "jeffrey82221@gmail.com"
-      - name: Git commit Release Schema
+      - name: Commit Schema
         run: |
           git add data/release.schema
           git add data/release.cuckoo
-          git diff-index --quiet HEAD || git commit -m 'update: package release schema'
-      - name: Git commit Latest Schema
-        run: |
           git add data/latest.schema
           git add data/latest.cuckoo
-          git diff-index --quiet HEAD || git commit -m 'update: package latest schema'
+          git diff-index --quiet HEAD || git commit -m 'update: schema'
       - name: Git pull
         run: |
-          git config --global user.email "jeffrey82221@gmail.com"
-          git config --global user.name "jeffrey82221"
           git config pull.rebase false
           git pull origin main || echo 'pull failed'
       - name: Push changes
