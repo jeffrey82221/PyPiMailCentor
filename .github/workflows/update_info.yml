@@ -62,7 +62,9 @@ jobs:
         run: ls -R
         working-directory: download
       - name: Merge jsonl
-        run: cat download/{0..99}/info.jsonl >> data/email_content.jsonl
+        run: |
+          rm -f data/email_content.jsonl
+          cat download/{0..99}/info.jsonl >> data/email_content.jsonl
       - name: Git commit
         run: |
           git config --global user.name "jeffrey82221"
