@@ -25,6 +25,7 @@ Refactor:
     - [X] Move extract_package_info.py to src/ and rename as update_info.py
     - [X] Apply update_all.py to `update` of update_info.py
 - [X] Feature: Run crawling using multiple github action jobs (for speed up.)
+- [X] Check if the github url is the true github repo
 """
 import os
 import pprint
@@ -64,6 +65,23 @@ def take_github_urls(project_urls):
     else:
         return []
 
+def remove_invalid(github_urls):
+    results_200 = []
+    for url in github_urls:
+        if requests.get(url).status_code == 200:
+            results_200.append(url)
+    results = []
+    if len(results_200) > 1:
+        # only take the github repo with valid owner and repo name. 
+        for url in results_200:
+            owner = url.split('/')[-2]
+            repo = url.split('/')[-1]
+            if requests.get(f"https://api.github.com/repos/{owner}/{repo}").status_code == 200:
+                results.append(url)
+    else:
+        results = results_200
+    assert len(results) <= 1, "There should be only at least one url left"
+    return results
 
 def get_star_count(github_urls):
     star_count_list = []
@@ -85,7 +103,7 @@ def get_star_count(github_urls):
 
 def load_data(src_path, fn):
     try:
-        return json_tool.load(f"{src_path}/{fn}")
+        return (fn, json_tool.load(f"{src_path}/{fn}"))
     except binascii.Error:
         print("skip", fn)
         return None
@@ -149,38 +167,36 @@ def update(src_path):
         curried.map(lambda x: x.replace("\n", "")),
         curried.filter(lambda x: ".json" in x),
         curried.map(curry(load_data)("data/latest")),
-        curried.filter(lambda x: x is not None and "info" in x),
+        curried.filter(lambda x: x[1] is not None and "info" in x[1] and x[0] == f'{x[1]["info"]["name"]}.json'),
+        curried.map(lambda x: x[1]),
         curried.map(
             curry(field_wise_transformation)(
                 {
                     "name": lambda x: x["info"]["name"],
-                    "author": lambda x: x["info"]["author"],
-                    # "author_email": lambda x: x["info"]["author_email"],
-                    "maintainer": lambda x: x["info"]["maintainer"],
-                    # "maintainer_email": lambda x: x["info"]["maintainer_email"],
                     "license": lambda x: x["info"]["license"],
-                    "github_urls": lambda x: take_github_urls(
+                    "github_urls": lambda x: remove_invalid(take_github_urls(
                         x["info"]["project_urls"]
-                    ),
+                    )),
                 }
             ),
         ),
-        curried.filter(lambda x: len(x["github_urls"]) >= 1),
+        curried.filter(lambda x: len(x["github_urls"]) == 1),
         curried.map(
             curry(field_wise_enrichment)(
                 {
-                    "downloads": lambda x: partial(
+                    "downloads_in_180days": lambda x: partial(
                         get_180days_download_count, max_try=3
-                    )(x["name"])
+                    )(x["name"]),
+                    "owner": lambda x: x["github_urls"][0].split('/')[-2],
+                    "repo": lambda x: x["github_urls"][0].split('/')[-1],
                 }
             )
         ),
-        curried.filter(lambda x: x["downloads"] is not None and x["downloads"] > 1000),
+        curried.filter(lambda x: x["downloads"] is not None),
         verbose,
         curried.map(append_line),
         list,
     )
-
 
 if __name__ == "__main__":
     SRC_PATH = "data/latest.menu"

@@ -33,8 +33,8 @@ jobs:
         run: jskiner --in-path ./download --nworkers 2 --verbose true --out data/release.schema --batch-size 100 --cuckoo-path data/release.cuckoo --cuckoo-size 50000000 --cuckoo-fpr 0.1
       - name: Detect schema for data/latest
         run: jskiner --in-path ./decrypt --nworkers 2 --verbose true --out data/latest.schema --batch-size 1000 --cuckoo-path data/latest.cuckoo --cuckoo-size 50000000 --cuckoo-fpr 0.1
-      - name: Detect schema for data/email_content.jsonl
-        run: jskiner --in-path data/email_content.jsonl --nworkers 2 --verbose true --out data/email_content.schema --split 1000 --split-path content_split/
+      - name: Detect schema for data/repo_info.jsonl
+        run: jskiner --in-path data/repo_info.jsonl --nworkers 2 --verbose true --out data/repo_info.schema --split 1000 --split-path content_split/
       - name: Git Config
         run: |
           git config --global user.name "jeffrey82221"
