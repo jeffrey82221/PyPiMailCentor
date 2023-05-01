@@ -10,6 +10,10 @@ from datetime import datetime, timedelta
 import tqdm
 import pandas as pd
 import glob
+from toolz import curry
+from toolz import curried
+from toolz.functoolz import pipe
+from functools import partial
 from src.ignore import ignore_filter
 from src.json_tool import json_tool
 from src.time_utils import convert_to_datetime
@@ -60,10 +64,16 @@ class MonthlyReleaseLoader:
 
     def run(self):
         file_names = sorted(os.listdir(self._src_path))
-        file_names = tqdm.tqdm(file_names, desc=self.target_parquet)
-        paths = map(lambda fn: f"{self._src_path}/{fn}", file_names)
-        releases = MonthlyReleaseLoader.extract_content_pipe(paths)
-        releases = self._time_filter.connect(releases)
+        releases = pipe(
+            file_names,
+            partial(tqdm.tqdm, desc=self.target_parquet),
+            curried.map(lambda fn: f"{self._src_path}/{fn}"),
+            curried.filter(lambda x: '.json' in x),
+            curried.map(json_tool.load),
+            curried.filter(lambda x: 'releases' in x),
+            MonthlyReleaseLoader.extract_content_pipe,
+            self._time_filter.connect
+        )
         dataframe = pd.DataFrame.from_records(
             releases, columns=["package", "version", "upload_time"]
         )
@@ -88,9 +98,8 @@ class MonthlyReleaseLoader:
         )
 
     @staticmethod
-    def extract_content_pipe(paths):
-        for path in paths:
-            result = json_tool.load(path)
+    def extract_content_pipe(data_stream):
+        for result in data_stream:
             for version, release_content in result["releases"].items():
                 if ignore_filter._pattern.match(version) and release_content:
                     times = [
@@ -102,6 +111,9 @@ class MonthlyReleaseLoader:
                     except BaseException as e:
                         print(f"error in {version}:\n", release_content)
                         raise e
+            
+
+
 
 
 def get_all_etl_date():

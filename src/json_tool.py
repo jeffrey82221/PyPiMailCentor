@@ -1,6 +1,6 @@
 import json
 import base64
-
+import binascii
 
 class JsonTool:
     def dump(self, save_path: str, result: dict):
@@ -12,12 +12,17 @@ class JsonTool:
             print(save_path, "saved")
 
     def load(self, load_path: str) -> dict:
-        json_strs = []
-        with open(load_path, "rb") as f:
-            for string in f:
-                json_strs.append(base64.b64decode(string))
-            result = json.loads(b"\n".join(json_strs))
-        return result
+        try:
+            json_strs = []
+            with open(load_path, "rb") as f:
+                for string in f:
+                    json_strs.append(base64.b64decode(string))
+                result = json.loads(b"\n".join(json_strs))
+            return result
+        except binascii.Error as e:
+            print('[load] Error on', load_path)
+            print("string:", string)
+            raise e
 
     @staticmethod
     def _dump_original(save_path, result):
