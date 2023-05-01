@@ -68,11 +68,11 @@ class MonthlyReleaseLoader:
             file_names,
             partial(tqdm.tqdm, desc=self.target_parquet),
             curried.map(lambda fn: f"{self._src_path}/{fn}"),
-            curried.filter(lambda x: '.json' in x),
+            curried.filter(lambda x: ".json" in x),
             curried.map(json_tool.load),
-            curried.filter(lambda x: 'releases' in x),
+            curried.filter(lambda x: "releases" in x),
             MonthlyReleaseLoader.extract_content_pipe,
-            self._time_filter.connect
+            self._time_filter.connect,
         )
         dataframe = pd.DataFrame.from_records(
             releases, columns=["package", "version", "upload_time"]
@@ -111,9 +111,6 @@ class MonthlyReleaseLoader:
                     except BaseException as e:
                         print(f"error in {version}:\n", release_content)
                         raise e
-            
-
-
 
 
 def get_all_etl_date():

@@ -65,6 +65,7 @@ def take_github_urls(project_urls):
     else:
         return []
 
+
 def remove_invalid(github_urls):
     results_200 = []
     for url in github_urls:
@@ -72,16 +73,20 @@ def remove_invalid(github_urls):
             results_200.append(url)
     results = []
     if len(results_200) > 1:
-        # only take the github repo with valid owner and repo name. 
+        # only take the github repo with valid owner and repo name.
         for url in results_200:
-            owner = url.split('/')[-2]
-            repo = url.split('/')[-1]
-            if requests.get(f"https://api.github.com/repos/{owner}/{repo}").status_code == 200:
+            owner = url.split("/")[-2]
+            repo = url.split("/")[-1]
+            if (
+                requests.get(f"https://api.github.com/repos/{owner}/{repo}").status_code
+                == 200
+            ):
                 results.append(url)
     else:
         results = results_200
     assert len(results) <= 1, "There should be only at least one url left"
     return results
+
 
 def get_star_count(github_urls):
     star_count_list = []
@@ -167,16 +172,20 @@ def update(src_path):
         curried.map(lambda x: x.replace("\n", "")),
         curried.filter(lambda x: ".json" in x),
         curried.map(curry(load_data)("data/latest")),
-        curried.filter(lambda x: x[1] is not None and "info" in x[1] and x[0] == f'{x[1]["info"]["name"]}.json'),
+        curried.filter(
+            lambda x: x[1] is not None
+            and "info" in x[1]
+            and x[0] == f'{x[1]["info"]["name"]}.json'
+        ),
         curried.map(lambda x: x[1]),
         curried.map(
             curry(field_wise_transformation)(
                 {
                     "name": lambda x: x["info"]["name"],
                     "license": lambda x: x["info"]["license"],
-                    "github_urls": lambda x: remove_invalid(take_github_urls(
-                        x["info"]["project_urls"]
-                    )),
+                    "github_urls": lambda x: remove_invalid(
+                        take_github_urls(x["info"]["project_urls"])
+                    ),
                 }
             ),
         ),
@@ -187,8 +196,8 @@ def update(src_path):
                     "downloads_in_180days": lambda x: partial(
                         get_180days_download_count, max_try=3
                     )(x["name"]),
-                    "owner": lambda x: x["github_urls"][0].split('/')[-2],
-                    "repo": lambda x: x["github_urls"][0].split('/')[-1],
+                    "owner": lambda x: x["github_urls"][0].split("/")[-2],
+                    "repo": lambda x: x["github_urls"][0].split("/")[-1],
                 }
             )
         ),
@@ -197,6 +206,7 @@ def update(src_path):
         curried.map(append_line),
         list,
     )
+
 
 if __name__ == "__main__":
     SRC_PATH = "data/latest.menu"

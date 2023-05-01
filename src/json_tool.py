@@ -2,6 +2,7 @@ import json
 import base64
 import binascii
 
+
 class JsonTool:
     def dump(self, save_path: str, result: dict):
         json_str = bytes(json.dumps(result, ensure_ascii=False, indent=2), "utf-8")
@@ -20,7 +21,7 @@ class JsonTool:
                 result = json.loads(b"\n".join(json_strs))
             return result
         except binascii.Error as e:
-            print('[load] Error on', load_path)
+            print("[load] Error on", load_path)
             print("string:", string)
             raise e
 
