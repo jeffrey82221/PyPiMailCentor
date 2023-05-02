@@ -225,7 +225,7 @@ jobs:
           path: /tmp/info.jsonl
           retention-days: 1
   merge_repo_infos:
-    name: Merge Jsonl into 
+    name: Merge Infos 
     needs: update_repo_info
     runs-on: ubuntu-latest
     steps:

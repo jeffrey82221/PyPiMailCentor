@@ -66,12 +66,12 @@ def take_github_urls(project_urls):
         return []
 
 
-def remove_invalid(github_urls):
+def select_one(github_urls):
     results_200 = []
     for url in github_urls:
         if requests.get(url).status_code == 200:
             results_200.append(url)
-    results = []
+    results_valid = []
     if len(results_200) > 1:
         # only take the github repo with valid owner and repo name.
         for url in results_200:
@@ -81,11 +81,38 @@ def remove_invalid(github_urls):
                 requests.get(f"https://api.github.com/repos/{owner}/{repo}").status_code
                 == 200
             ):
-                results.append(url)
+                results_valid.append(url)
     else:
-        results = results_200
-    assert len(results) <= 1, f"There are more than 2 urls: {results}"
-    return results
+        results_valid = results_200
+    if len(results_valid) >= 1:
+        max_popularity = -1
+        max_url = None
+        for url in results_valid:
+            owner = url.split("/")[-2]
+            repo = url.split("/")[-1]
+            n_watchers = len(
+                requests.get(
+                    f"https://api.github.com/repos/{owner}/{repo}/subscribers"
+                ).json()
+            )
+            n_stars = len(
+                requests.get(
+                    f"https://api.github.com/repos/{owner}/{repo}/stargazers"
+                ).json()
+            )
+            n_forks = len(
+                requests.get(
+                    f"https://api.github.com/repos/{owner}/{repo}/forks"
+                ).json()
+            )
+            popularity = n_watchers + n_stars + n_forks
+            if popularity > max_popularity:
+                max_url = url
+        result = max_url
+    elif len(results_valid) == 1:
+        result = results_valid[0]
+    else:
+        result = None
 
 
 def get_star_count(github_urls):
@@ -183,26 +210,26 @@ def update(src_path):
                 {
                     "name": lambda x: x["info"]["name"],
                     "license": lambda x: x["info"]["license"],
-                    "github_urls": lambda x: remove_invalid(
+                    "github_url": lambda x: select_one(
                         take_github_urls(x["info"]["project_urls"])
                     ),
                 }
             ),
         ),
-        curried.filter(lambda x: len(x["github_urls"]) == 1),
+        curried.filter(lambda x: isinstance(x["github_url"], str)),
         curried.map(
             curry(field_wise_enrichment)(
                 {
                     "downloads_in_180days": lambda x: partial(
                         get_180days_download_count, max_try=3
                     )(x["name"]),
-                    "owner": lambda x: x["github_urls"][0].split("/")[-2],
-                    "repo": lambda x: x["github_urls"][0].split("/")[-1],
+                    "owner": lambda x: x["github_url"].split("/")[-2],
+                    "repo": lambda x: x["github_url"].split("/")[-1],
                 }
             )
         ),
         curried.filter(lambda x: x["downloads_in_180days"] is not None),
-        verbose,
+        # verbose,
         curried.map(append_line),
         list,
     )
