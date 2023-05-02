@@ -201,7 +201,7 @@ def update(src_path):
                 }
             )
         ),
-        curried.filter(lambda x: x["downloads"] is not None),
+        curried.filter(lambda x: x["downloads_in_180days"] is not None),
         verbose,
         curried.map(append_line),
         list,
