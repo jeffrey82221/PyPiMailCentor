@@ -9,7 +9,7 @@ Output: email_content.jsonl
 """
 import sys
 from src.update_all import update_all
-from src.update_info import update
+from src.update_repo_info import update
 
 if __name__ == "__main__":
     update_all(

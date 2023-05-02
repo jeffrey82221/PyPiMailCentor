@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 import tqdm
 import pandas as pd
 import glob
-from toolz import curry
 from toolz import curried
 from toolz.functoolz import pipe
 from functools import partial
@@ -63,9 +62,8 @@ class MonthlyReleaseLoader:
         return end_time.replace(day=1)
 
     def run(self):
-        file_names = sorted(os.listdir(self._src_path))
         releases = pipe(
-            file_names,
+            sorted(os.listdir(self._src_path)),
             partial(tqdm.tqdm, desc=self.target_parquet),
             curried.map(lambda fn: f"{self._src_path}/{fn}"),
             curried.filter(lambda x: ".json" in x),

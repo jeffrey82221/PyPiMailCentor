@@ -125,7 +125,9 @@ jobs:
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-known-hosts: github.com
       - name: build_menu
-        run: ls data/latest/ >> data/latest.menu
+        run: |
+          rm -f data/latest.menu
+          ls data/latest/ | grep .json >> data/latest.menu
       - name: Git commit
         run: |
           git config --global user.name "jeffrey82221"
@@ -164,6 +166,7 @@ jobs:
           pip install tqdm
           pip install pandas==1.4.2
           pip install pyarrow==8.0.0
+          pip install toolz
       - name: RUN ETL
         run: |
           python update_release_time.py
@@ -187,7 +190,7 @@ jobs:
           branch: main
   update_repo_info:
     name: Extract Repo Info and Download Count
-    needs: update_latest_jsons
+    needs: list_latest_json
     runs-on: ubuntu-20.04
     strategy:
       matrix:
