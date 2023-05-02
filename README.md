@@ -16,7 +16,7 @@ Automatically sending report about python packages for python developers. This i
     - [X] 1a. Get author, author_email, maintainer, maintainer_email
     - [X] 1b. Github Repo Url: check info->project_urls of latest jsons for github ur
     - [ ] 2. Popularity: use github api to get Star count. (only select the most popular 10000 packages)
-        - [ ] Ref: https://tryapis.com/github/api/activity-list-stargazers-for-repo
+        - [x] Ref: https://tryapis.com/github/api/activity-list-stargazers-for-repo
         - [X] Ref: https://pypi.org/project/pypistats/
     - [X] 3a. License: check info->license or from github repo.
     - [ ] 3b. Get repo contributors and their organization:
