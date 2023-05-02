@@ -84,7 +84,7 @@ def remove_invalid(github_urls):
                 results.append(url)
     else:
         results = results_200
-    assert len(results) <= 1, "There should be only at least one url left"
+    assert len(results) <= 1, f"There are more than 2 urls: {results}"
     return results
 
 
