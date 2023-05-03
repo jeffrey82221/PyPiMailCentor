@@ -66,16 +66,7 @@ def take_github_urls(project_urls):
         return []
 
 
-def select_one(github_urls):
-    url = pipe(
-        github_urls,
-        _remove_invalid_github_url,
-        _remove_non_repo_github_url,
-        _select_most_popular_repo_url
-    )
-    return url
-
-def _remove_invalid_github_url(urls):
+def remove_invalid_github_url(urls):
     results = []
     for url in urls:
         status_code = requests.get(url).status_code
@@ -84,10 +75,13 @@ def _remove_invalid_github_url(urls):
         elif status_code == 404:
             pass
         else:
-            raise ValueError(f'repo page call response with status scode: {status_code}. {url}')
+            raise ValueError(
+                f"repo page call response with status scode: {status_code}. {url}"
+            )
     return results
 
-def _remove_non_repo_github_url(urls):
+
+def remove_non_repo_github_url(urls):
     results = []
     for url in urls:
         owner = url.split("/")[-2]
@@ -99,10 +93,13 @@ def _remove_non_repo_github_url(urls):
         elif status_code == 404:
             pass
         else:
-            raise ValueError(f'repo api call response with status scode: {status_code}. https://api.github.com/repos/{owner}/{repo} -> {response.json()}')
+            raise ValueError(
+                f"repo api call response with status scode: {status_code}. https://api.github.com/repos/{owner}/{repo} -> {response.json()}"
+            )
     return results
 
-def _select_most_popular_repo_url(urls):
+
+def select_most_popular_repo_url(urls):
     if len(urls) >= 1:
         max_popularity = -1
         max_url = None
@@ -133,6 +130,7 @@ def _select_most_popular_repo_url(urls):
     else:
         result = None
     return result
+
 
 def get_star_count(github_urls):
     star_count_list = []
@@ -228,8 +226,12 @@ def update(src_path):
                 {
                     "name": lambda x: x["info"]["name"],
                     "license": lambda x: x["info"]["license"],
-                    "github_url": lambda x: select_one(
-                        take_github_urls(x["info"]["project_urls"])
+                    "github_url": lambda x: pipe(
+                        x["info"]["project_urls"],
+                        take_github_urls,
+                        remove_invalid_github_url,
+                        remove_non_repo_github_url,
+                        select_most_popular_repo_url,
                     ),
                 }
             ),
