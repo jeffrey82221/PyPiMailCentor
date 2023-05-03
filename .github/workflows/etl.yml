@@ -216,6 +216,8 @@ jobs:
           pip install toolz
           pip install cytoolz==0.12.1
           pip install httpx==0.23.0
+      - name: Insert PAT
+        run: echo ${{ secrets.PERSONAL_TOKEN }} >> pat.key
       - name: Run update script
         run: python update_repo_info_all.py data/latest.menu ${{ matrix.alpha }} ${{ matrix.split_cnt }}
       - name: Upload Tmp Jsonl

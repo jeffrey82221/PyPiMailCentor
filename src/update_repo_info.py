@@ -26,9 +26,9 @@ Refactor:
     - [X] Apply update_all.py to `update` of update_info.py
 - [X] Feature: Run crawling using multiple github action jobs (for speed up.)
 - [X] Check if the github url is the true github repo
+- [X] Add access token to Github API call
 """
 import os
-import pprint
 import binascii
 import re
 import requests
@@ -45,6 +45,14 @@ from src.json_tool import json_tool
 
 TARGET_PATH = "/tmp/info.jsonl"
 
+def get_github_api_header():
+    token = open("pat.key", 'r').read().strip()
+    headers = {
+        "Authorization": f"Token {token}"
+    }
+    return headers
+
+HEADERS = get_github_api_header()
 
 def take_github_urls(project_urls):
     if isinstance(project_urls, dict):
@@ -86,7 +94,7 @@ def remove_non_repo_github_url(urls):
     for url in urls:
         owner = url.split("/")[-2]
         repo = url.split("/")[-1]
-        response = requests.get(f"https://api.github.com/repos/{owner}/{repo}")
+        response = requests.get(f"https://api.github.com/repos/{owner}/{repo}", headers=HEADERS)
         status_code = response.status_code
         if status_code == 200:
             results.append(url)
@@ -108,17 +116,20 @@ def select_most_popular_repo_url(urls):
             repo = url.split("/")[-1]
             n_watchers = len(
                 requests.get(
-                    f"https://api.github.com/repos/{owner}/{repo}/subscribers"
+                    f"https://api.github.com/repos/{owner}/{repo}/subscribers",
+                    headers=HEADERS
                 ).json()
             )
             n_stars = len(
                 requests.get(
-                    f"https://api.github.com/repos/{owner}/{repo}/stargazers"
+                    f"https://api.github.com/repos/{owner}/{repo}/stargazers",
+                    headers=HEADERS
                 ).json()
             )
             n_forks = len(
                 requests.get(
-                    f"https://api.github.com/repos/{owner}/{repo}/forks"
+                    f"https://api.github.com/repos/{owner}/{repo}/forks",
+                    headers=HEADERS
                 ).json()
             )
             popularity = n_watchers + n_stars + n_forks
@@ -138,7 +149,8 @@ def get_star_count(github_urls):
         owner = url.split("/")[3]
         repo = url.split("/")[4]
         data = requests.get(
-            f"https://api.github.com/repos/{owner}/{repo}/stargazers"
+            f"https://api.github.com/repos/{owner}/{repo}/stargazers",
+            headers=HEADERS
         ).json()
         if isinstance(data, list):
             star_count_list.append(len(data))
