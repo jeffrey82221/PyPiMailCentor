@@ -67,27 +67,46 @@ def take_github_urls(project_urls):
 
 
 def select_one(github_urls):
-    results_200 = []
-    for url in github_urls:
-        if requests.get(url).status_code == 200:
-            results_200.append(url)
-    results_valid = []
-    if len(results_200) > 1:
-        # only take the github repo with valid owner and repo name.
-        for url in results_200:
-            owner = url.split("/")[-2]
-            repo = url.split("/")[-1]
-            if (
-                requests.get(f"https://api.github.com/repos/{owner}/{repo}").status_code
-                == 200
-            ):
-                results_valid.append(url)
-    else:
-        results_valid = results_200
-    if len(results_valid) >= 1:
+    url = pipe(
+        github_urls,
+        _remove_invalid_github_url,
+        _remove_non_repo_github_url,
+        _select_most_popular_repo_url
+    )
+    return url
+
+def _remove_invalid_github_url(urls):
+    results = []
+    for url in urls:
+        status_code = requests.get(url).status_code
+        if status_code == 200:
+            results.append(url)
+        elif status_code == 404:
+            pass
+        else:
+            raise ValueError(f'repo page call response with status scode: {status_code}. {url}')
+    return results
+
+def _remove_non_repo_github_url(urls):
+    results = []
+    for url in urls:
+        owner = url.split("/")[-2]
+        repo = url.split("/")[-1]
+        response = requests.get(f"https://api.github.com/repos/{owner}/{repo}")
+        status_code = response.status_code
+        if status_code == 200:
+            results.append(url)
+        elif status_code == 404:
+            pass
+        else:
+            raise ValueError(f'repo api call response with status scode: {status_code}. https://api.github.com/repos/{owner}/{repo} -> {response.json()}')
+    return results
+
+def _select_most_popular_repo_url(urls):
+    if len(urls) >= 1:
         max_popularity = -1
         max_url = None
-        for url in results_valid:
+        for url in urls:
             owner = url.split("/")[-2]
             repo = url.split("/")[-1]
             n_watchers = len(
@@ -109,11 +128,11 @@ def select_one(github_urls):
             if popularity > max_popularity:
                 max_url = url
         result = max_url
-    elif len(results_valid) == 1:
-        result = results_valid[0]
+    elif len(urls) == 1:
+        result = urls[0]
     else:
         result = None
-
+    return result
 
 def get_star_count(github_urls):
     star_count_list = []
@@ -158,8 +177,7 @@ def field_wise_enrichment(transforms: typing.Dict[str, typing.Callable], data: d
 
 def verbose(pipe):
     for i, data in enumerate(pipe):
-        print(i)
-        pprint.pprint(data)
+        print(i, data)
         yield data
 
 
@@ -229,7 +247,7 @@ def update(src_path):
             )
         ),
         curried.filter(lambda x: x["downloads_in_180days"] is not None),
-        # verbose,
+        verbose,
         curried.map(append_line),
         list,
     )
