@@ -29,6 +29,7 @@ UnionRecord(
                             UniformRecord(
                                 FieldSet(
                                     {
+                                        "API Documentation",
                                         "App Repository",
                                         "Application",
                                         "BaPSF",
@@ -43,6 +44,7 @@ UnionRecord(
                                         "Bug reports",
                                         "Bug tracker",
                                         "Bug-Tracker",
+                                        "BugTracker",
                                         "Bugs",
                                         "But Tracker",
                                         "Buy me a coffee",
@@ -150,6 +152,8 @@ UnionRecord(
                                         "github",
                                         "homepage",
                                         "issues",
+                                        "overview",
+                                        "repo",
                                         "repository",
                                         "source",
                                         "source_code",
