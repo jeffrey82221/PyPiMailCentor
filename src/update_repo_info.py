@@ -45,14 +45,15 @@ from src.json_tool import json_tool
 
 TARGET_PATH = "/tmp/info.jsonl"
 
+
 def get_github_api_header():
-    token = open("pat.key", 'r').read().strip()
-    headers = {
-        "Authorization": f"Token {token}"
-    }
+    token = open("pat.key", "r").read().strip()
+    headers = {"Authorization": f"Token {token}"}
     return headers
 
+
 HEADERS = get_github_api_header()
+
 
 def take_github_urls(project_urls):
     if isinstance(project_urls, dict):
@@ -94,7 +95,9 @@ def remove_non_repo_github_url(urls):
     for url in urls:
         owner = url.split("/")[-2]
         repo = url.split("/")[-1]
-        response = requests.get(f"https://api.github.com/repos/{owner}/{repo}", headers=HEADERS)
+        response = requests.get(
+            f"https://api.github.com/repos/{owner}/{repo}", headers=HEADERS
+        )
         status_code = response.status_code
         if status_code == 200:
             results.append(url)
@@ -117,19 +120,19 @@ def select_most_popular_repo_url(urls):
             n_watchers = len(
                 requests.get(
                     f"https://api.github.com/repos/{owner}/{repo}/subscribers",
-                    headers=HEADERS
+                    headers=HEADERS,
                 ).json()
             )
             n_stars = len(
                 requests.get(
                     f"https://api.github.com/repos/{owner}/{repo}/stargazers",
-                    headers=HEADERS
+                    headers=HEADERS,
                 ).json()
             )
             n_forks = len(
                 requests.get(
                     f"https://api.github.com/repos/{owner}/{repo}/forks",
-                    headers=HEADERS
+                    headers=HEADERS,
                 ).json()
             )
             popularity = n_watchers + n_stars + n_forks
@@ -149,8 +152,7 @@ def get_star_count(github_urls):
         owner = url.split("/")[3]
         repo = url.split("/")[4]
         data = requests.get(
-            f"https://api.github.com/repos/{owner}/{repo}/stargazers",
-            headers=HEADERS
+            f"https://api.github.com/repos/{owner}/{repo}/stargazers", headers=HEADERS
         ).json()
         if isinstance(data, list):
             star_count_list.append(len(data))

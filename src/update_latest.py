@@ -12,7 +12,8 @@ import requests
 from src.json_tool import json_tool
 from src.etl_utils import loop_over, ETagStorage
 
-etag_storage = ETagStorage('etag/latest')
+etag_storage = ETagStorage("etag/latest")
+
 
 @loop_over
 def update(pkg_name):
@@ -33,26 +34,30 @@ def update(pkg_name):
         res = requests.get(url)
         if res.status_code == 200:
             result = res.json()
-            assert 'releases' in result, f'release is not in response, only {result.keys()}'
+            assert (
+                "releases" in result
+            ), f"release is not in response, only {result.keys()}"
             json_tool.dump(f"data/latest/{pkg_name}.json", result)
-            etag_storage.update(pkg_name, res.headers['ETag'])
+            etag_storage.update(pkg_name, res.headers["ETag"])
         elif res.status_code == 404:
             pass
         else:
-            raise ValueError(f'status_code is not 200/404 but {res.status_code}')
+            raise ValueError(f"status_code is not 200/404 but {res.status_code}")
     else:
-        res = requests.get(url, headers={'If-None-Match': etag})
+        res = requests.get(url, headers={"If-None-Match": etag})
         if res.status_code == 304:
             pass
         elif res.status_code == 404:
             pass
         elif res.status_code == 200:
             result = res.json()
-            assert 'releases' in result, f'release is not in response, only {result.keys()}'
+            assert (
+                "releases" in result
+            ), f"release is not in response, only {result.keys()}"
             json_tool.dump(f"data/latest/{pkg_name}.json", result)
-            etag_storage.update(pkg_name, res.headers['ETag'])
+            etag_storage.update(pkg_name, res.headers["ETag"])
         else:
-            raise ValueError(f'status_code is not 200/304/404 but {res.status_code}')
+            raise ValueError(f"status_code is not 200/304/404 but {res.status_code}")
 
 
 if __name__ == "__main__":
