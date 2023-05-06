@@ -1,126 +1,58 @@
 """
 Updating Latest Json Filess from PyPi
+
+- [X] Revise the crawling logic
+    - [X] A etag storage object 
+        - [X] get_etag('package_name') -> Optional[str]
+        - [X] update_etag('package_name', 'etag')
+    - [X] New Update Flow:
 """
 import sys
-import os
 import requests
-import pprint
-from functools import lru_cache
-import time
-from src.time_utils import convert_to_datetime
 from src.json_tool import json_tool
-from src.etl_utils import loop_over
+from src.etl_utils import loop_over, ETagStorage
 
-
-class Logger:
-    def __init__(self, log_path):
-        self._log_path = log_path
-
-    def apply(self, func):
-        def wrap(*args):
-            self.append(*args[1:])
-            return func(*args)
-
-        return wrap
-
-    def append(self, *args):
-        with open(self._log_path, "a") as f:
-            f.write(", ".join(map(str, args)) + "\n")
-
-
-class UpdateController:
-    def __init__(self, download_path="data/latest"):
-        self._download_path = download_path
-
-    def update(self, pkg_name):
-        if self.already_download(pkg_name):
-            if self.get_online_max_release_time(
-                pkg_name
-            ) > self.get_offline_max_release_time(pkg_name):
-                latest = self.download_latest(pkg_name)
-                json_tool.dump(f"{self._download_path}/{pkg_name}.json", latest)
-        else:
-            latest = self.download_latest(pkg_name)
-            json_tool.dump(f"{self._download_path}/{pkg_name}.json", latest)
-
-    def assert_update(self, pkg_name):
-        assert self.get_online_max_release_time(
-            pkg_name
-        ) == self.get_offline_max_release_time(pkg_name)
-
-    @staticmethod
-    def create_file(path):
-        if not os.path.exists(path):
-            with open(path, "w") as fp:
-                pass
-
-    def get_offline_release_count(self, pkg_name):
-        result = json_tool.load(f"{self._download_path}/{pkg_name}.json")
-        return UpdateController.extract_max_time(result)
-
-    def get_online_max_release_time(self, pkg_name):
-        result = self.download_latest(pkg_name)
-        return UpdateController.extract_max_time(result)
-
-    @staticmethod
-    def extract_max_time(result):
-        assert "releases" in result and len(result["releases"])
-        times = []
-        for releases_content in result["releases"].values():
-            for content in releases_content:
-                times.append(convert_to_datetime(content["upload_time_iso_8601"]))
-        assert len(times) > 0
-        return max(times)
-
-    def get_offline_max_release_time(self, pkg_name):
-        result = self.download_latest(pkg_name)
-        times = []
-        for releases_content in result["releases"].values():
-            for content in releases_content:
-                times.append(convert_to_datetime(content["upload_time_iso_8601"]))
-        return max(times)
-
-    def already_download(self, pkg_name):
-        return os.path.exists(f"data/latest/{pkg_name}.json")
-
-    def get_online_release_count(self, pkg_name):
-        result = self.download_latest(pkg_name)
-        return len(result["releases"].keys())
-
-    def downloadable(self, pkg_name):
-        try:
-            self.get_online_max_release_time(pkg_name)
-            return "releases" in self.download_latest(pkg_name)
-        except AssertionError:
-            return False
-
-    @lru_cache
-    def download_latest(self, pkg_name):
-        return self.download_with_retries(pkg_name)
-
-    def download_with_retries(self, pkg_name):
-        retry_cnt = 0
-        while retry_cnt < 5:
-            try:
-                url = f"https://pypi.org/pypi/{pkg_name}/json"
-                result = requests.get(url).json()
-                assert "releases" in result
-                break
-            except:
-                time.sleep(retry_cnt)
-                retry_cnt += 1
-        return result
-
+etag_storage = ETagStorage('etag/latest')
 
 @loop_over
 def update(pkg_name):
-    controller = UpdateController()
-    if controller.downloadable(pkg_name):
-        controller.update(pkg_name)
-        controller.assert_update(pkg_name)
+    """
+    if etag exists:
+        if etag is outdated:
+            -> get result
+            -> retries if no 'releases' key
+        else:
+            pass
     else:
-        print(pkg_name, "not found:")
-        pprint.pprint(controller.download_latest(pkg_name))
+        -> get result
+        -> retries if no 'releases' key
+    """
+    etag = etag_storage.get(pkg_name)
+    url = f"https://pypi.org/pypi/{pkg_name}/json"
+    if etag is None:
+        res = requests.get(url)
+        if res.status_code == 200:
+            result = res.json()
+            assert 'releases' in result, f'release is not in response, only {result.keys()}'
+            json_tool.dump(f"data/latest/{pkg_name}.json", result)
+            etag_storage.update(pkg_name, res.headers['ETag'])
+        elif res.status_code == 404:
+            pass
+        else:
+            raise ValueError(f'status_code is not 200/404 but {res.status_code}')
+    else:
+        res = requests.get(url, headers={'If-None-Match': etag})
+        if res.status_code == 304:
+            pass
+        elif res.status_code == 404:
+            pass
+        elif res.status_code == 200:
+            result = res.json()
+            assert 'releases' in result, f'release is not in response, only {result.keys()}'
+            json_tool.dump(f"data/latest/{pkg_name}.json", result)
+            etag_storage.update(pkg_name, res.headers['ETag'])
+        else:
+            raise ValueError(f'status_code is not 200/304/404 but {res.status_code}')
 
 
 if __name__ == "__main__":
