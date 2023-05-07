@@ -4,6 +4,14 @@ Extract info of packages and save into a Json file
 source: data/latest
 target: data/package_info.json
 
+Enhance Efficiency: 
+- [ ] Do github repo checking every week only 
+- [ ] No need to show downloads_in_180days
+- [ ] Add filter to ignore package having owner/repo extracted 
+
+Feature: 
+- [ ] Extract download at another job. 
+
 Refactor: 
 - [X] Build Registered Pipeline
     - [X] Unit: extract method + transform method + target_field_name
@@ -27,6 +35,7 @@ Refactor:
 - [X] Feature: Run crawling using multiple github action jobs (for speed up.)
 - [X] Check if the github url is the true github repo
 - [X] Add access token to Github API call
+
 """
 import os
 import binascii
