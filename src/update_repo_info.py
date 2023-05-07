@@ -42,6 +42,8 @@ import binascii
 import re
 import requests
 import typing
+import time
+from datetime import datetime
 from toolz import curry
 from toolz import curried
 from toolz.functoolz import pipe
@@ -51,17 +53,65 @@ from functools import partial
 from httpx import HTTPStatusError
 import time
 from src.json_tool import json_tool
+from src.etl_utils import APIGetter
 
 TARGET_PATH = "/tmp/info.jsonl"
 
+class RepoAPIGetter(APIGetter):
+    def __init__(self, api_name):
+        super().__init__(f'etag/{api_name}', f'data/{api_name}')
 
-def get_github_api_header():
-    token = open("pat.key", "r").read().strip()
-    headers = {"Authorization": f"Token {token}"}
-    return headers
+    def get_url(self, key):
+        return f"https://api.github.com/repos/{key}"
+    
+    def call_api(self, key: str, etag=''):
+        token = open("pat.key", "r").read().strip()
+        headers = {
+            "Authorization": f"Token {token}",
+            "If-None-Match": etag
+        }
+        response = requests.get(
+            self.get_url(key), headers=headers
+        )
+        status_code = response.status_code
+        if status_code == 200:
+            print('Remaining X-RateLimit:', response.headers['X-RateLimit-Remaining'])
+            body = response.json()
+        elif status_code == 304:
+            body = None
+        elif status_code == 404:
+            body = dict()
+        elif status_code == 403 and int(response.headers['X-RateLimit-Remaining']) == 0:
+            current_utc_time = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
+            reset_utc_time = int(response.headers['X-RateLimit-Reset'])
+            sleep_seconds = reset_utc_time - current_utc_time
+            print(f'Sleep for {sleep_seconds} seconds due to rate limit reaching')
+            time.sleep(sleep_seconds)
+            return self.call_api(key, etag=etag)
+        else:
+            raise ValueError(
+                f"repo api call response with status code: {status_code}. body: {body}"
+            )
+        return status_code, response.headers, body
+
+class SubstriberAPIGetter(RepoAPIGetter):
+    def get_url(self, key):
+        return f"https://api.github.com/repos/{key}/subscribers"
+
+class StarsAPIGetter(RepoAPIGetter):
+    def get_url(self, key):
+        return f"https://api.github.com/repos/{key}/stargazers"
+    
+class ForksAPIGetter(RepoAPIGetter):
+    def get_url(self, key):
+        return f"https://api.github.com/repos/{key}/forks"
 
 
-HEADERS = get_github_api_header()
+repo_api_getter = RepoAPIGetter('repo')
+watcher_api_getter = SubstriberAPIGetter('watcher')
+stars_api_getter = StarsAPIGetter('star')
+forks_api_getter = ForksAPIGetter('fork')
+
 
 
 def take_github_urls(project_urls):
@@ -98,52 +148,28 @@ def remove_invalid_github_url(urls):
             )
     return results
 
-
 def remove_non_repo_github_url(urls):
     results = []
     for url in urls:
-        owner = url.split("/")[-2]
-        repo = url.split("/")[-1]
-        response = requests.get(
-            f"https://api.github.com/repos/{owner}/{repo}", headers=HEADERS
-        )
-        status_code = response.status_code
-        if status_code == 200:
+        owner, repo = url.split("/")[-2:]
+        body = repo_api_getter.get(f'{owner}/{repo}')
+        if len(body) > 0:
             results.append(url)
-        elif status_code == 404:
-            pass
         else:
-            raise ValueError(
-                f"repo api call response with status scode: {status_code}. https://api.github.com/repos/{owner}/{repo} -> {response.json()}"
-            )
+            pass
     return results
 
 
 def select_most_popular_repo_url(urls):
-    if len(urls) >= 1:
+    if len(urls) > 1:
         max_popularity = -1
         max_url = None
         for url in urls:
-            owner = url.split("/")[-2]
-            repo = url.split("/")[-1]
-            n_watchers = len(
-                requests.get(
-                    f"https://api.github.com/repos/{owner}/{repo}/subscribers",
-                    headers=HEADERS,
-                ).json()
-            )
-            n_stars = len(
-                requests.get(
-                    f"https://api.github.com/repos/{owner}/{repo}/stargazers",
-                    headers=HEADERS,
-                ).json()
-            )
-            n_forks = len(
-                requests.get(
-                    f"https://api.github.com/repos/{owner}/{repo}/forks",
-                    headers=HEADERS,
-                ).json()
-            )
+            owner, repo = url.split("/")[-2:]
+            key = f'{owner}/{repo}'
+            n_watchers = len(watcher_api_getter.get(key))
+            n_stars = len(stars_api_getter.get(key))
+            n_forks = len(forks_api_getter.get(key))
             popularity = n_watchers + n_stars + n_forks
             if popularity > max_popularity:
                 max_url = url
@@ -153,24 +179,6 @@ def select_most_popular_repo_url(urls):
     else:
         result = None
     return result
-
-
-def get_star_count(github_urls):
-    star_count_list = []
-    for url in github_urls:
-        owner = url.split("/")[3]
-        repo = url.split("/")[4]
-        data = requests.get(
-            f"https://api.github.com/repos/{owner}/{repo}/stargazers", headers=HEADERS
-        ).json()
-        if isinstance(data, list):
-            star_count_list.append(len(data))
-        else:
-            print(data)
-    if star_count_list:
-        return sum(star_count_list)
-    else:
-        return None
 
 
 def load_data(src_path, fn):
