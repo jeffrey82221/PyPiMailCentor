@@ -37,9 +37,9 @@ jobs:
           max_attempts: 3
           retry_on: error
           timeout_seconds: 30
-				command: |
-          git checkout -b update_repo_info/${{ matrix.alpha }}
-          git push --set-upstream origin update_repo_info/${{ matrix.alpha }}
+          command: |
+            git checkout -b update_repo_info/${{ matrix.alpha }}
+            git push --set-upstream origin update_repo_info/${{ matrix.alpha }}
       - name: Insert PAT
         run: echo ${{ secrets.PERSONAL_TOKEN }} >> pat.key
       - name: Run update script
