@@ -32,12 +32,14 @@ jobs:
           pip install cytoolz==0.12.1
           pip install httpx==0.23.0
       - name: New Branch
-        run: |
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          timeout_seconds: 30
+				command: |
           git checkout -b update_repo_info/${{ matrix.alpha }}
           git push --set-upstream origin update_repo_info/${{ matrix.alpha }}
-        retry:
-          max-retries: 3
-          delay: 60s
       - name: Insert PAT
         run: echo ${{ secrets.PERSONAL_TOKEN }} >> pat.key
       - name: Run update script
