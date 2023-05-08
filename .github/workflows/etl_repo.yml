@@ -1,7 +1,13 @@
 name: REPO ETL
+<<<<<<< HEAD
 on: push
   #schedule:
   # - cron: "0 8 * * SUN"
+=======
+on: 
+  schedule:
+   - cron: "0 8 * * SUN"
+>>>>>>> 6efcf8012b3e66a7dcaf6e266874abdc9c356b45
 jobs:
   update_repo_info:
     name: Update Repo Info
