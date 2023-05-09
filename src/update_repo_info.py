@@ -5,9 +5,9 @@ source: data/latest
 target: data/package_info.json
 
 Enhance Efficiency: 
-- [ ] Do github repo checking every week only 
-- [ ] No need to show downloads_in_180days
-- [ ] Add filter to ignore package having owner/repo extracted 
+- [X] Do github repo checking every week only 
+- [X] No need to show downloads_in_180days and license
+- [X] Add filter to ignore package having owner/repo extracted 
 
 Feature: 
 - [ ] Extract download at another job. 
@@ -42,8 +42,6 @@ import binascii
 import re
 import requests
 import typing
-import time
-from datetime import datetime
 from toolz import curry
 from toolz import curried
 from toolz.functoolz import pipe
@@ -53,65 +51,9 @@ from functools import partial
 from httpx import HTTPStatusError
 import time
 from src.json_tool import json_tool
-from src.etl_utils import APIGetter
+from src.github_api import forks_api_getter, stars_api_getter, watcher_api_getter, repo_api_getter
 
 TARGET_PATH = "/tmp/info.jsonl"
-
-class RepoAPIGetter(APIGetter):
-    def __init__(self, api_name):
-        super().__init__(f'etag/{api_name}', f'data/{api_name}')
-
-    def get_url(self, key):
-        return f"https://api.github.com/repos/{key}"
-    
-    def call_api(self, key: str, etag=''):
-        token = open("pat.key", "r").read().strip()
-        headers = {
-            "Authorization": f"Token {token}",
-            "If-None-Match": etag
-        }
-        response = requests.get(
-            self.get_url(key), headers=headers
-        )
-        status_code = response.status_code
-        if status_code == 200:
-            print('Remaining X-RateLimit:', response.headers['X-RateLimit-Remaining'])
-            body = response.json()
-        elif status_code == 304:
-            body = None
-        elif status_code == 404:
-            body = dict()
-        elif status_code == 403 and int(response.headers['X-RateLimit-Remaining']) == 0:
-            current_utc_time = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
-            reset_utc_time = int(response.headers['X-RateLimit-Reset'])
-            sleep_seconds = reset_utc_time - current_utc_time
-            print(f'Sleep for {sleep_seconds} seconds due to rate limit reaching')
-            time.sleep(sleep_seconds)
-            return self.call_api(key, etag=etag)
-        else:
-            raise ValueError(
-                f"repo api call response with status code: {status_code}. body: {body}"
-            )
-        return status_code, response.headers, body
-
-class SubstriberAPIGetter(RepoAPIGetter):
-    def get_url(self, key):
-        return f"https://api.github.com/repos/{key}/subscribers"
-
-class StarsAPIGetter(RepoAPIGetter):
-    def get_url(self, key):
-        return f"https://api.github.com/repos/{key}/stargazers"
-    
-class ForksAPIGetter(RepoAPIGetter):
-    def get_url(self, key):
-        return f"https://api.github.com/repos/{key}/forks"
-
-
-repo_api_getter = RepoAPIGetter('repo')
-watcher_api_getter = SubstriberAPIGetter('watcher')
-stars_api_getter = StarsAPIGetter('star')
-forks_api_getter = ForksAPIGetter('fork')
-
 
 
 def take_github_urls(project_urls):
@@ -203,6 +145,10 @@ def field_wise_enrichment(transforms: typing.Dict[str, typing.Callable], data: d
         data[field] = func(data)
     return data
 
+def field_wise_delete(ignore_fields: typing.List[str], data: dict):
+    for field in ignore_fields:
+        del data[field]
+    return data
 
 def verbose(pipe):
     for i, data in enumerate(pipe):
@@ -256,7 +202,7 @@ def update(src_path):
             curry(field_wise_transformation)(
                 {
                     "name": lambda x: x["info"]["name"],
-                    "license": lambda x: x["info"]["license"],
+                    # "license": lambda x: x["info"]["license"],
                     "github_url": lambda x: pipe(
                         x["info"]["project_urls"],
                         take_github_urls,
@@ -280,6 +226,11 @@ def update(src_path):
             )
         ),
         curried.filter(lambda x: x["downloads_in_180days"] is not None),
+        curried.map(
+            curry(field_wise_delete)(
+                ['downloads_in_180days', 'github_url']
+            )
+        ),
         verbose,
         curried.map(append_line),
         list,
