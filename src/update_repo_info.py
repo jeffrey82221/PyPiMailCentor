@@ -89,6 +89,10 @@ def remove_invalid_github_url(urls):
         if status_code == 200:
             results.append(url)
         elif status_code == 404:
+            # Non-existing Page
+            pass
+        elif status_code == 451:
+            # Take-Down Page
             pass
         else:
             raise ValueError(
