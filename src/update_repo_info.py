@@ -51,7 +51,13 @@ from functools import partial
 from httpx import HTTPStatusError
 import time
 from src.json_tool import json_tool
-from src.github_api import forks_api_getter, stars_api_getter, watcher_api_getter, repo_api_getter
+from src.github_api import (
+    forks_api_getter, 
+    stars_api_getter, 
+    watcher_api_getter, 
+    repo_api_getter
+)
+from src.etl_utils import NotExistingException, TOSException
 
 TARGET_PATH = "/tmp/info.jsonl"
 
@@ -94,11 +100,18 @@ def remove_non_repo_github_url(urls):
     results = []
     for url in urls:
         owner, repo = url.split("/")[-2:]
-        body = repo_api_getter.get(f'{owner}/{repo}')
-        if len(body) > 0:
-            results.append(url)
-        else:
+        try:
+            body = repo_api_getter.get(f'{owner}/{repo}')
+            if len(body) > 0:
+                results.append(url)
+            else:
+                pass
+        except NotExistingException:
             pass
+        except TOSException:
+            results.append(url)
+        except BaseException as e:
+            raise e
     return results
 
 

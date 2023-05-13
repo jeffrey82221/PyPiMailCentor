@@ -36,6 +36,15 @@ class ETagStorage:
         make_folder(self._path, key)
         json.dump(etag, open(f"{self._path}/{key}.json", "w"))
 
+class TOSException(Exception):
+    pass
+
+class NotExistingException(Exception):
+    pass
+
+class AlreadyExistException(Exception):
+    pass
+
 class APIGetter:
     def __init__(self, etag_path, cache_path):
         self.etag_store = ETagStorage(etag_path)
@@ -48,23 +57,18 @@ class APIGetter:
     def get(self, key):
         etag = self.etag_store.get(key)
         if etag == 404:
-            body = dict()
+            raise NotExistingException
         elif etag is None:
-            status_code, header, body = self.call_api(key)
-            if status_code == 200:
-                self.update_cache(key, header['ETag'], body)
-            elif status_code == 404:
-                self.update_cache(key, 404, body)
-            else:
-                raise ValueError('status code is not 404/200')
+            header, body = self.call_api(key)
+            self.update_cache(key, header['ETag'], body)
         else:
-            status_code, header, body = self.call_api(key, etag=etag)
-            if status_code == 304:
-                body = json_tool.load(f'{self.cache_path}/{key}.json')
-            elif status_code == 200:
+            try:
+                header, body = self.call_api(key, etag=etag)
                 self.update_cache(key, header['ETag'], body)
-            else:
-                raise ValueError('status code is not 304/200')
+            except AlreadyExistException:
+                body = json_tool.load(f'{self.cache_path}/{key}.json')
+            except BaseException as e:
+                raise e
         return body
     
     def update_cache(self, key, etag, body):

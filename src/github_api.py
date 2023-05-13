@@ -2,6 +2,7 @@ import requests
 from datetime import datetime
 import time
 from src.etl_utils import APIGetter
+from src.etl_utils import NotExistingException, TOSException, AlreadyExistException
 
 class RepoAPIGetter(APIGetter):
     def __init__(self, api_name):
@@ -23,22 +24,30 @@ class RepoAPIGetter(APIGetter):
         if status_code == 200:            
             body = response.json()
         elif status_code == 304:
-            body = None
+            raise AlreadyExistException
         elif status_code == 404:
-            body = dict()
-        elif status_code == 403 and int(response.headers['X-RateLimit-Remaining']) == 0:
-            current_utc_time = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
-            reset_utc_time = int(response.headers['X-RateLimit-Reset'])
-            sleep_seconds = reset_utc_time - current_utc_time
-            print(f'Sleep for {sleep_seconds} seconds due to rate limit reaching')
-            time.sleep(sleep_seconds)
-            return self.call_api(key, etag=etag)
+            raise NotExistingException
+        elif status_code == 403: 
+            body = response.json()
+            if body['block']['reason'] == 'tos':
+                raise TOSException
+            elif int(response.headers['X-RateLimit-Remaining']) == 0:
+                current_utc_time = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
+                reset_utc_time = int(response.headers['X-RateLimit-Reset'])
+                sleep_seconds = reset_utc_time - current_utc_time
+                print(f'Sleep for {sleep_seconds} seconds due to rate limit reaching')
+                time.sleep(sleep_seconds)
+                return self.call_api(key, etag=etag)
+            else:
+                raise ValueError(
+                    f"repo api call response with status code: {status_code}. body: {body}"
+                )
         else:
             body = response.json()
             raise ValueError(
                 f"repo api call response with status code: {status_code}. body: {body}"
             )
-        return status_code, response.headers, body
+        return response.headers, body
 
 class SubstriberAPIGetter(RepoAPIGetter):
     def get_url(self, key):
