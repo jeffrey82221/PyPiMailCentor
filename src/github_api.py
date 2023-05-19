@@ -21,6 +21,7 @@ class RepoAPIGetter(APIGetter):
             self.get_url(key), headers=headers
         )
         status_code = response.status_code
+        print(f'[call_api] key: {key} -> raise status_code: {status_code}.')
         if status_code == 200:            
             body = response.json()
         elif status_code == 304:
@@ -47,7 +48,6 @@ class RepoAPIGetter(APIGetter):
             raise ValueError(
                 f"repo api call response with status code: {status_code}. body: {body}"
             )
-        print(f'[call_api] key: {key} -> ({status_code}). body: {body}')
         return response.headers, body
 
 class SubstriberAPIGetter(RepoAPIGetter):
