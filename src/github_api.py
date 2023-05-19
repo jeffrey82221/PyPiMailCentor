@@ -47,7 +47,8 @@ class RepoAPIGetter(APIGetter):
             raise ValueError(
                 f"repo api call response with status code: {status_code}. body: {body}"
             )
-        return status_code, response.headers, body
+        print(f'[call_api] key: {key} -> ({status_code}). body: {body}')
+        return response.headers, body
 
 class SubstriberAPIGetter(RepoAPIGetter):
     def get_url(self, key):
