@@ -1,7 +1,7 @@
 name: REPO ETL
-on: 
-  schedule:
-   - cron: "0 11 * * SUN"
+on: push 
+  #schedule:
+  # - cron: "0 11 * * SUN"
 jobs:
   update_repo_info:
     name: Update Repo Info
@@ -36,9 +36,9 @@ jobs:
       - name: New Branch
         uses: nick-fields/retry@v2
         with:
-          max_attempts: 3
+          max_attempts: 20
           retry_on: error
-          timeout_seconds: 30
+          timeout_seconds: 60
           command: |
             git checkout -b update_repo_info/${{ matrix.alpha }}
             git push --set-upstream origin update_repo_info/${{ matrix.alpha }}
