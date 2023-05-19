@@ -107,7 +107,7 @@ def remove_non_repo_github_url(urls):
         try:
             _ = repo_api_getter.get(f'{owner}/{repo}')
             results.append(url)
-            print('repo found (200/304)')
+            print('repo found')
         except NotExistingException:
             print('no existing repo found (404)')
         except TOSException:
