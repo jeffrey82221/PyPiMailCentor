@@ -36,9 +36,10 @@ jobs:
       - name: New Branch
         uses: nick-fields/retry@v2
         with:
+          retry_wait_seconds: 60
           max_attempts: 20
           retry_on: error
-          timeout_seconds: 60
+          timeout_seconds: 180
           command: |
             git checkout -b update_repo_info/${{ matrix.alpha }}
             git push --set-upstream origin update_repo_info/${{ matrix.alpha }}
