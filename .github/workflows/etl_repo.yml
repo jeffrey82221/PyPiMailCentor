@@ -1,7 +1,7 @@
 name: REPO ETL
-on: 
-  schedule:
-   - cron: "0 11 * * SUN"
+on: push
+  #schedule:
+   #- cron: "0 11 * * SUN"
 jobs:
   update_repo_info:
     name: Update Repo Info
@@ -33,11 +33,16 @@ jobs:
           pip install httpx==0.23.0
       - name: Try Delete
         run: git push origin -d update_repo_info/${{ matrix.alpha }} || echo 'do nothing'
+      - name: Wait
+        uses: 1itachi/sleep-random@v1.0.0
+        with:
+          minutes: '10'
+          random: 'true'
       - name: New Branch
         uses: nick-fields/retry@v2
         with:
           retry_wait_seconds: 60
-          max_attempts: 20
+          max_attempts: 5
           retry_on: any
           timeout_seconds: 60
           command: |
