@@ -184,7 +184,7 @@ def get_180days_download_count(pkg_name, max_try=10):
         except HTTPStatusError as e:
             if e.response.status_code == 404:
                 break
-            elif e.response.status_code == 429:
+            elif e.response.status_code == 429 or e.response.status_code == 503:
                 time.sleep(i * 5)
                 if i < max_try:
                     continue
