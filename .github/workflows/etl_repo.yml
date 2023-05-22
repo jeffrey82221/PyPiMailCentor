@@ -40,7 +40,7 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           retry_wait_seconds: 60
-          max_attempts: 5
+          max_attempts: 20
           retry_on: any
           timeout_seconds: 180
           command: |
