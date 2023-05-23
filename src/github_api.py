@@ -30,7 +30,7 @@ class RepoAPIGetter(APIGetter):
             raise NotExistingException
         elif status_code == 403: 
             body = response.json()
-            if body['block']['reason'] == 'tos':
+            if 'block' in body and body['block']['reason'] == 'tos':
                 raise TOSException
             elif int(response.headers['X-RateLimit-Remaining']) == 0:
                 current_utc_time = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
