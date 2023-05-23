@@ -1,5 +1,5 @@
 name: REPO ETL
-on:
+on: push
   #schedule:
    #- cron: "0 11 * * SUN"
 jobs:
