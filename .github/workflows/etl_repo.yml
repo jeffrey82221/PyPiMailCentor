@@ -21,14 +21,8 @@ jobs:
           utcOffset: "+08:00"
       - name: Use current time
         env:
-          #TIME: "${{ steps.current-time.outputs.time }}"
-          #R_TIME: "${{ steps.current-time.outputs.readableTime }}"
           F_TIME: "${{ steps.current-time.outputs.formattedTime }}"
-          #YEAR: "${{ steps.current-time.outputs.year }}"
-          #DAY: "${{ steps.current-time.outputs.day }}"
         run: echo $F_TIME
-      #- name: delete branch
-        #run: curl -s -X DELETE -u jeffrey82221:${{secrets.PERSONAL_TOKEN}} https://api.github.com/repos/jeffrey82221/PyPiMailCentor/git/refs/heads/update_repo_info/${{ matrix.alpha }}
       - name: checkout 
         uses: actions/checkout@v3
         with:
