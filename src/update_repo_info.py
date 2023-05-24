@@ -81,23 +81,33 @@ def take_github_urls(project_urls):
     else:
         return []
 
-
-def remove_invalid_github_url(urls):
-    results = []
-    for url in urls:
+def is_valid_github_url(url, retries=3):
+    wait = 5
+    while retries > 0:
         status_code = requests.get(url).status_code
         if status_code == 200:
-            results.append(url)
+            return True
         elif status_code == 404:
             # Non-existing Page
-            pass
+            return False
         elif status_code == 451:
             # Take-Down Page
-            pass
+            return False
+        elif status_code == 502:
+            time.sleep(wait)
+            retries -= 1
+            wait += 5
         else:
             raise ValueError(
                 f"repo page call response with status scode: {status_code}. {url}"
             )
+    raise ValueError("retries count excess")
+
+def remove_invalid_github_url(urls):
+    results = []
+    for url in urls:
+        if is_valid_github_url(url):
+            results.append(url)
     return results
 
 def remove_non_repo_github_url(urls):
