@@ -35,7 +35,7 @@ class RepoAPIGetter(APIGetter):
             elif int(response.headers['X-RateLimit-Remaining']) == 0:
                 current_utc_time = int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
                 reset_utc_time = int(response.headers['X-RateLimit-Reset'])
-                sleep_seconds = reset_utc_time - current_utc_time
+                sleep_seconds = reset_utc_time - current_utc_time + 10
                 print(f'Sleep for {sleep_seconds} seconds due to rate limit reaching')
                 time.sleep(sleep_seconds)
                 return self.call_api(key, etag=etag)
