@@ -42,11 +42,6 @@ jobs:
           pip install toolz
           pip install cytoolz==0.12.1
           pip install httpx==0.23.0
-      - name: Wait
-        uses: 1itachi/sleep-random@v1.0.0
-        with:
-          minutes: '10'
-          random: 'true'
       - name: New Branch
         uses: nick-fields/retry@v2
         with:
@@ -55,6 +50,7 @@ jobs:
           retry_on: any
           timeout_seconds: 1800
           command: |
+            git config --global http.postBuffer 1048576000
             git checkout -b update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }} || echo 'cannot check new branch locally'
             git push --set-upstream origin update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }}
       - name: Insert PAT
