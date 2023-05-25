@@ -84,7 +84,12 @@ def take_github_urls(project_urls):
 def is_valid_github_url(url, retries=3):
     wait = 5
     while retries > 0:
-        status_code = requests.get(url).status_code
+        try:
+            status_code = requests.get(url).status_code
+        except requests.exceptions.ConnectionError:
+            time.sleep(wait)
+            retries -= 1
+            wait += 5
         if status_code == 200:
             return True
         elif status_code == 404:
