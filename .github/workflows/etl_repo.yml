@@ -62,7 +62,7 @@ jobs:
         with:
           name: "${{ matrix.alpha }}"
           path: /tmp/info.jsonl
-          retention-days: 1
+          retention-days: 5
       - name: Git Commit - Jsons
         run: |
           git config --global user.name "jeffrey82221"
@@ -94,7 +94,7 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.PERSONAL_TOKEN }}"
           MERGE_LABELS: "automerge"
-          MERGE_METHOD: "rebase"
+          MERGE_METHOD: "merge"
           MERGE_COMMIT_MESSAGE: "Automerge Repo Jsons ${{ matrix.alpha }}"
           MERGE_FORKS: "false"
           MERGE_RETRIES: "${{ matrix.split_cnt }}"
