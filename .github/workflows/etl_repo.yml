@@ -1,7 +1,7 @@
 name: REPO ETL
-on: 
-  schedule:
-   - cron: "0 3 * * SUN"
+on: push
+  #schedule:
+   #- cron: "0 3 * * SUN"
 jobs:
   update_repo_info:
     name: Update Repo Info
@@ -24,7 +24,7 @@ jobs:
           F_TIME: "${{ steps.current-time.outputs.formattedTime }}"
         run: echo $F_TIME
       - name: create new branch
-        uses: peterjgrainger/action-create-branch@v2.2.0
+        uses: peterjgrainger/action-create-branch@v2.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
