@@ -43,6 +43,9 @@ class RepoAPIGetter(APIGetter):
                 raise ValueError(
                     f"repo api call response with status code: {status_code}. body: {body}"
                 )
+        elif status_code == 502:
+            time.sleep(60)
+            return self.call_api(key, etag=etag)
         else:
             body = response.json()
             raise ValueError(
