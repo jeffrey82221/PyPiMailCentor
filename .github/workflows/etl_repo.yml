@@ -35,9 +35,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
-          ref: 'update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }}'
+          ref: main #'update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }}'
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-known-hosts: github.com
+      - name: checkout to feature branch
+        run: |
+          git fetch origin update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }}
+          git branch update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }} FETCH_HEAD
+          git checkout update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }}
       - name: Set Up Python 
         uses: actions/setup-python@v3
         with:
