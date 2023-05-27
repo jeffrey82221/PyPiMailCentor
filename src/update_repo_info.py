@@ -81,7 +81,7 @@ def take_github_urls(project_urls):
     else:
         return []
 
-def is_valid_github_url(url, retries=3):
+def is_valid_github_url(url, retries=5):
     wait = 5
     while retries > 0:
         try:
