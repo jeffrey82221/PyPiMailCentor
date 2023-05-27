@@ -106,7 +106,7 @@ def is_valid_github_url(url, retries=5):
             raise ValueError(
                 f"repo page call response with status scode: {status_code}. {url}"
             )
-    raise ValueError("retries count excess")
+    raise ValueError("retries count exceed")
 
 def remove_invalid_github_url(urls):
     results = []
