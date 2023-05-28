@@ -134,6 +134,10 @@ jobs:
           ref: 'main'
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-known-hosts: github.com
+      - name: merge locally and push
+        uses: pr-mpt/actions-merge-branch@v2
+        with:
+          from: "origin/${{ steps.branch.outputs.name }}"
       - name: checkout to feature branch
         run: |
           git fetch origin ${{ steps.branch.outputs.name }}
