@@ -22,7 +22,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: "current-time"
-          path: /current-time.txt
+          path: ./current-time.txt
           retention-days: 1
   update_repo_info:
     name: Update Repo Info
@@ -39,9 +39,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: "current-time"
-          path: /current-time
+          path: ./current-time
       - name: Use current time
-        run: cat /current-time/current-time.txt
+        run: cat ./current-time/current-time.txt
       - name: create new branch
         uses: peterjgrainger/action-create-branch@v2.3.0
         env:
