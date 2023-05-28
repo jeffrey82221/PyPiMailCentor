@@ -45,7 +45,7 @@ jobs:
         run: echo "time=$(cat ./current-time/current-time.txt)" >> $GITHUB_OUTPUT
       - name: show branch name
         env: 
-          BRANCH: "update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }}"
+          BRANCH: "update_repo_info/${{ steps.current-time.outputs.time }}-${{ matrix.alpha }}"
         run: echo "$BRANCH"
       - name: create new branch
         uses: peterjgrainger/action-create-branch@v2.3.0
