@@ -3,7 +3,21 @@ on:
   schedule:
    - cron: "0 0 * * *"
   workflow_dispatch:
+env:
+  CURRENT_TIME: "${{ steps.current_time.outputs.formattedTime }}"
 jobs:
+  get_time:
+    name: Get execution time
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Get current time
+        uses: josStorer/get-current-time@v2
+        id: current_time
+        with:
+          format: YYYY-MM-DD
+          utcOffset: "+08:00"
+      - name: echo
+        run: echo "$CURRENT_TIME"
   update_repo_info:
     name: Update Repo Info
     runs-on: ubuntu-20.04
