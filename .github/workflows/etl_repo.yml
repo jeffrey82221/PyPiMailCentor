@@ -38,10 +38,6 @@ jobs:
           ref: main #'update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }}'
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-known-hosts: github.com
-      - name: checkout to feature branch
-        run: |
-          git fetch origin update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }}
-          git checkout update_repo_info/${{ steps.current-time.outputs.formattedTime }}-${{ matrix.alpha }}
       - name: Set Up Python 
         uses: actions/setup-python@v3
         with:
