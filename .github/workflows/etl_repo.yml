@@ -137,8 +137,7 @@ jobs:
       - name: merge locally and push
         uses: pr-mpt/actions-merge-branch@v2
         with:
-          author: jeffrey82221<jeffrey82221@gmail.com>
-          from: "origin/${{ steps.branch.outputs.name }}"
+          from: "${{ steps.branch.outputs.name }}"
       - name: checkout to feature branch
         run: |
           git fetch origin ${{ steps.branch.outputs.name }}
