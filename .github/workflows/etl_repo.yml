@@ -131,7 +131,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
-          ref: '${{ steps.branch.outputs.name }}'
+          ref: 'main'
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-known-hosts: github.com
       - name: checkout to feature branch
