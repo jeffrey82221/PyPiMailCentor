@@ -18,7 +18,7 @@ jobs:
         uses: josStorer/get-current-time@v2
         id: current-time
         with:
-          format: YYYYMMDD
+          format: YYYY-MM-DD
           utcOffset: "+08:00"
       - name: Use current time
         env:
@@ -90,7 +90,7 @@ jobs:
         uses: josStorer/get-current-time@v2
         id: current-time
         with:
-          format: YYYYMMDD
+          format: YYYY-MM-DD
           utcOffset: "+08:00"
       - name: checkout 
         uses: actions/checkout@v3
