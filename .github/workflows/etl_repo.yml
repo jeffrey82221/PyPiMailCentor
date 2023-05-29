@@ -137,6 +137,8 @@ jobs:
       - name: fetch feature branch
         run: |
           git fetch origin ${{ steps.branch.outputs.name }}
+          git switch ${{ steps.branch.outputs.name }}
+          git switch main
       - name: my merge
         run: |
           git config --global user.name "jeffrey82221"
