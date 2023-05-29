@@ -50,18 +50,12 @@ jobs:
         run: |
           echo "$BRANCH"
           echo "name=$BRANCH" >> $GITHUB_OUTPUT
-      - name: checkout main
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: 'main'
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: github.com
       - name: create new branch
         uses: peterjgrainger/action-create-branch@v2.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
+          sha: '${{github.sha}}'
           branch: 'refs/heads/${{ steps.branch.outputs.name }}'
       - name: checkout feature branch
         uses: actions/checkout@v3
