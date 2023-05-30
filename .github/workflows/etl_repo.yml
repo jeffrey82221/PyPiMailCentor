@@ -140,6 +140,30 @@ jobs:
         run: |
           echo "$BRANCH"
           echo "name=$BRANCH" >> $GITHUB_OUTPUT
+      - name: Pull Request - Jsons
+        id: pr_jsons
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: "Merge ${{ steps.branch.outputs.name }}"
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          branch: ${{ steps.branch.outputs.name }}
+          base: main
+          delete-branch: true
+          labels: "automerge"
+      - name: Merge Pull Request - Jsons
+        if: steps.pr_jsons.outputs.pull-request-operation == 'created'
+        uses: "pascalgn/automerge-action@v0.15.6"
+        env:
+          GITHUB_TOKEN: "${{ secrets.PERSONAL_TOKEN }}"
+          MERGE_LABELS: "automerge"
+          MERGE_METHOD: "merge"
+          MERGE_COMMIT_MESSAGE: "Automerge Repo Jsons ${{ matrix.alpha }}"
+          MERGE_FORKS: "false"
+          MERGE_RETRIES: "${{ matrix.split_cnt }}"
+          MERGE_DELETE_BRANCH: "true"
+          MERGE_RETRY_SLEEP: "60000"
+          MERGE_REQUIRED_APPROVALS: "0"
+          PULL_REQUEST: "${{ steps.pr_jsons.outputs.pull-request-number }}"
       - name: checkout main
         uses: actions/checkout@v3
         with:
@@ -167,30 +191,6 @@ jobs:
         run: |
           git fetch origin ${{ steps.branch.outputs.name }}
           git checkout ${{ steps.branch.outputs.name }}
-      - name: Pull Request - Jsons
-        id: pr_jsons
-        uses: peter-evans/create-pull-request@v5
-        with:
-          title: "Merge ${{ steps.branch.outputs.name }}"
-          token: ${{ secrets.PERSONAL_TOKEN }}
-          branch: ${{ steps.branch.outputs.name }}
-          base: main
-          delete-branch: true
-          labels: "automerge"
-      - name: Merge Pull Request - Jsons
-        if: steps.pr_jsons.outputs.pull-request-operation == 'created'
-        uses: "pascalgn/automerge-action@v0.15.6"
-        env:
-          GITHUB_TOKEN: "${{ secrets.PERSONAL_TOKEN }}"
-          MERGE_LABELS: "automerge"
-          MERGE_METHOD: "merge"
-          MERGE_COMMIT_MESSAGE: "Automerge Repo Jsons ${{ matrix.alpha }}"
-          MERGE_FORKS: "false"
-          MERGE_RETRIES: "${{ matrix.split_cnt }}"
-          MERGE_DELETE_BRANCH: "true"
-          MERGE_RETRY_SLEEP: "60000"
-          MERGE_REQUIRED_APPROVALS: "0"
-          PULL_REQUEST: "${{ steps.pr_jsons.outputs.pull-request-number }}"
   merge_repo_infos:
     name: Merge Infos 
     needs: update_repo_info
