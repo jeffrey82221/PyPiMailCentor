@@ -140,6 +140,16 @@ jobs:
         run: |
           echo "$BRANCH"
           echo "name=$BRANCH" >> $GITHUB_OUTPUT
+      - name: checkout main
+        uses: actions/checkout@v3
+        with:
+          ref: 'main'
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: github.com
+      - name: fetch feature branch
+        run: |
+          git fetch origin ${{ steps.branch.outputs.name }}
+          git switch ${{ steps.branch.outputs.name }}
       - name: Pull Request - Jsons
         id: pr_jsons
         uses: peter-evans/create-pull-request@v5
