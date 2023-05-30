@@ -12,7 +12,7 @@ jobs:
         uses: josStorer/get-current-time@v2
         id: current-time
         with:
-          format: YYYY-MM-DD
+          format: YYYY-MM-DD-HH
           utcOffset: "+08:00"
       - name: write current time to file
         env:
