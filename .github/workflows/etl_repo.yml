@@ -150,6 +150,11 @@ jobs:
         run: |
           git fetch origin ${{ steps.branch.outputs.name }}
           git switch ${{ steps.branch.outputs.name }}
+          git switch main
+      - name: merge locally and push
+        uses: pr-mpt/actions-merge-branch@v2
+        with:
+          from: "${{ steps.branch.outputs.name }}"
       - name: Pull Request - Jsons
         id: pr_jsons
         uses: peter-evans/create-pull-request@v5
