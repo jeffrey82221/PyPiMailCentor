@@ -102,7 +102,7 @@ jobs:
           git add data/star
           git add data/watcher
           git add etag/
-          git diff-index --quiet HEAD || git commit -m 'update: github api etag and response'
+          git diff-index --quiet HEAD || git commit -m 'update: github api etag and response (${{ steps.current-time.outputs.time }}-${{ matrix.alpha }})'
       - name: Push - Jsons
         uses: ad-m/github-push-action@master
         with:
