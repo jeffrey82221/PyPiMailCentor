@@ -88,6 +88,7 @@ jobs:
           retention-days: 5
       - name: Git Commit - Jsons
         run: |
+          rm -f /home/runner/work/PyPiMailCentor/PyPiMailCentor/.git/index.lock
           git config --global user.name "jeffrey82221"
           git config --global user.email "jeffrey82221@gmail.com"
           git add data/fork
