@@ -103,17 +103,11 @@ jobs:
           git add data/watcher
           git add etag/
           git diff-index --quiet HEAD || git commit -m 'update: github api etag and response (${{ steps.current-time.outputs.time }}-${{ matrix.alpha }})'
-      - name: switch to main
-        run: git switch main
-      - name: merge locally and push
-        uses: pr-mpt/actions-merge-branch@v2
+      - name: Push - Jsons
+        uses: ad-m/github-push-action@master
         with:
-          from: "${{ steps.branch.outputs.name }}"
-      #- name: Push - Jsons
-        #uses: ad-m/github-push-action@master
-        #with:
-          #github_token: ${{ secrets.PERSONAL_TOKEN }}
-          #branch: '${{ steps.branch.outputs.name }}'
+          github_token: ${{ secrets.PERSONAL_TOKEN }}
+          branch: '${{ steps.branch.outputs.name }}'
   merge_branches_to_main:
     name: pull request onto main branch
     needs: update_repo_info
