@@ -152,9 +152,9 @@ jobs:
           git switch ${{ steps.branch.outputs.name }}
           git switch main
       - name: merge locally and push
-        uses: pr-mpt/actions-merge-branch@v2
-        with:
-          from: "${{ steps.branch.outputs.name }}"
+        run: |
+          git merge ${{ steps.branch.outputs.name }} --allow-unrelated-histories
+          git push origin main
   merge_repo_infos:
     name: Merge Infos 
     needs: update_repo_info
