@@ -155,7 +155,7 @@ jobs:
           git switch main
       - name: merge locally and push
         run: |
-          git merge ${{ steps.branch.outputs.name }} --allow-unrelated-histories
+          git merge ${{ steps.branch.outputs.name }} --allow-unrelated-histories --strategy-option theirs
           git push origin main
   merge_repo_infos:
     name: Merge Infos 
