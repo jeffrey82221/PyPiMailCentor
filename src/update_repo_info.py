@@ -86,26 +86,26 @@ def is_valid_github_url(url, retries=5):
     while retries > 0:
         try:
             status_code = requests.get(url).status_code
+            if status_code == 200:
+                return True
+            elif status_code == 404:
+                # Non-existing Page
+                return False
+            elif status_code == 451:
+                # Take-Down Page
+                return False
+            elif status_code == 502 or status_code == 429:
+                time.sleep(wait)
+                retries -= 1
+                wait += 5
+            else:
+                raise ValueError(
+                    f"repo page call response with status scode: {status_code}. {url}"
+                )
         except requests.exceptions.ConnectionError:
             time.sleep(wait)
             retries -= 1
             wait += 5
-        if status_code == 200:
-            return True
-        elif status_code == 404:
-            # Non-existing Page
-            return False
-        elif status_code == 451:
-            # Take-Down Page
-            return False
-        elif status_code == 502 or status_code == 429:
-            time.sleep(wait)
-            retries -= 1
-            wait += 5
-        else:
-            raise ValueError(
-                f"repo page call response with status scode: {status_code}. {url}"
-            )
     raise ValueError("retries count exceed")
 
 def remove_invalid_github_url(urls):
