@@ -2,8 +2,10 @@ import os
 import tqdm
 import json
 import abc
+import time
 from pathlib import Path
 from typing import Dict, Optional, Tuple
+from requests.exceptions import ConnectionError
 from src.json_tool import json_tool
 
 def loop_over(func):
@@ -67,6 +69,9 @@ class APIGetter:
                 self.update_cache(key, header['ETag'], body)
             except AlreadyExistException:
                 body = json_tool.load(f'{self.cache_path}/{key}.json')
+            except ConnectionError:
+                time.sleep(5)
+                return self.get(key)
             except BaseException as e:
                 raise e
         return body
