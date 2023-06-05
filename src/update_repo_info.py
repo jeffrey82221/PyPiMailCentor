@@ -94,7 +94,7 @@ def is_valid_github_url(url, retries=5):
             elif status_code == 451:
                 # Take-Down Page
                 return False
-            elif status_code == 502 or status_code == 429:
+            elif status_code in ［429, 502, 503]:
                 time.sleep(wait)
                 retries -= 1
                 wait += 5
