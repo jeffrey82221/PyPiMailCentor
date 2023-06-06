@@ -198,4 +198,4 @@ jobs:
           git merge ${{ steps.branch.outputs.name }} --allow-unrelated-histories --strategy-option theirs
           git push origin main
       - name: delete the feature branch
-        run: 
+        run: git push origin -d ${{ steps.branch.outputs.name }}
