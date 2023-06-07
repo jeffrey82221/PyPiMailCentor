@@ -32,7 +32,7 @@ jobs:
       fail-fast: true
       max-parallel: 5
       matrix:
-        alpha: [0, 1, 2, 3, 4, 5] # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
+        alpha: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
         split_cnt: [50]
     steps:
       - name: Maximize build space
@@ -193,53 +193,4 @@ jobs:
              git push origin main
              git push origin --delete ${{ steps.branch.outputs.name }}-$i
           done
-  merge_branches_to_main:
-    name: pull request onto main branch
-    needs: merge_branches_in_one_shot
-    runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        alpha: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
-        split_cnt: [50]
-    steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
-      - name: Download current time
-        uses: actions/download-artifact@v3
-        with:
-          name: "current-time"
-          path: ./current-time
-      - name: Use current time
-        id: current-time
-        run: echo "time=$(cat ./current-time/current-time.txt)" >> $GITHUB_OUTPUT
-      - name: set branch name
-        id: branch
-        env: 
-          BRANCH: "update_repo_info/${{ steps.current-time.outputs.time }}-${{ matrix.alpha }}"
-        run: |
-          echo "$BRANCH"
-          echo "name=$BRANCH" >> $GITHUB_OUTPUT
-      - name: checkout main
-        uses: actions/checkout@v3
-        with:
-          ref: 'main'
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: github.com
-      - name: fetch feature branch
-        run: |
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
-          git fetch origin ${{ steps.branch.outputs.name }}
-          git switch ${{ steps.branch.outputs.name }}
-          git switch main
-      - name: merge locally and push
-        run: |
-          git merge ${{ steps.branch.outputs.name }} --allow-unrelated-histories --strategy-option theirs
-          git push origin main
 
