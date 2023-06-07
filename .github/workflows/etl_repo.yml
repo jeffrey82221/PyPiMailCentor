@@ -1,7 +1,7 @@
 name: REPO ETL
 on: 
   schedule:
-   - cron: "0 0 * * *"
+   - cron: "0 0 1 * *"
   workflow_dispatch:
 jobs:
   get_time:
@@ -23,7 +23,7 @@ jobs:
         with:
           name: "current-time"
           path: ./current-time.txt
-          retention-days: 1
+          retention-days: 7
   update_repo_info:
     name: Update Repo Info
     needs: get_time
