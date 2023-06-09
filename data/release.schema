@@ -99,6 +99,7 @@ UnionRecord(
                                         "Git Clone URL",
                                         "GitHub",
                                         "GitHub Discussions",
+                                        "GitHub Project",
                                         "GitHub Repository",
                                         "GitHub: Issues",
                                         "GitHub: Repo",
