@@ -121,6 +121,7 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           max_attempts: 3
+          timeout_minutes: 180
           command: python update_latest_all.py data/package.menu ${{ matrix.alpha }} ${{ matrix.split_cnt }}
       - name: Git Commit - Jsons
         run: |
