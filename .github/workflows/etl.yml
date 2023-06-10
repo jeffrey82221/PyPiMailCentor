@@ -83,7 +83,10 @@ jobs:
           git checkout -b update_latest/${{ matrix.alpha }}
           git push --set-upstream origin update_latest/${{ matrix.alpha }}
       - name: Run update script
-        run: python update_latest_all.py data/package.menu ${{ matrix.alpha }} ${{ matrix.split_cnt }}
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          command: python update_latest_all.py data/package.menu ${{ matrix.alpha }} ${{ matrix.split_cnt }}
       - name: Git Commit - Jsons
         run: |
           git config --global user.name "jeffrey82221"
