@@ -23,7 +23,7 @@ jobs:
         with:
           name: "current-time"
           path: ./current-time.txt
-          retention-days: 1
+          retention-days: 3
   update_repo_info:
     name: Update Repo Info
     needs: get_time
