@@ -40,7 +40,7 @@ jobs:
     steps:
       - id: create_range
         run: |
-          n=${{ inputs.split_cnt }}
+          n=${{ inputs.split_cnt-1 }}
           string="["
           for ((i=0; i<n; i++)); do
             if [ $i -eq $n ]; then
@@ -49,6 +49,7 @@ jobs:
               string+="$i, "
             fi
           done
+          echo "$string"
           echo "range=$string" >> $GITHUB_OUTPUT
   update:
     name: Run ETL for update
