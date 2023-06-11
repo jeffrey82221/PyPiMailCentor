@@ -29,6 +29,13 @@ on:
       git-add-command:
         required: true
         type: string
+    secrets:
+      PERSONAL_TOKEN:
+        required: true
+        type: string 
+      SSH_PRIVATE_KEY:
+        required: true
+        type: string
 jobs:
   update:
     name: Run ETL for update
