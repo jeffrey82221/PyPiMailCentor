@@ -2,9 +2,6 @@ name: parallel
 on:
   workflow_call:
     inputs:
-      alpha: 
-        required: true
-        type: string
       split_cnt:
         required: true
         type: number
@@ -37,7 +34,7 @@ jobs:
       fail-fast: true
       max-parallel: ${{ inputs.max-parallel }}
       matrix:
-        alpha: ${{ inputs.alpha }}
+        alpha: ${{ range(0, inputs.split_cnt) }} 
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
