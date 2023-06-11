@@ -2,9 +2,6 @@ name: parallel
 on:
   workflow_call:
     inputs:
-      alpha:
-        required: true
-        type: string
       split_cnt:
         required: true
         type: number
@@ -35,14 +32,33 @@ on:
       ssh-private-key:
         required: true
 jobs:
+  make_range:
+    name: Build Range
+    runs-on: ubuntu-20.04
+    outputs:
+      range: ${{ steps.create_range.outputs.range }}
+    steps:
+      - id: create_range
+        run: |
+          n=${{ inputs.split_cnt }}
+          string="["
+          for ((i=0; i<n; i++)); do
+            if [ $i -eq $n ]; then
+              string+="$i]"
+            else
+              string+="$i, "
+            fi
+          done
+          echo "range=$string" >> $GITHUB_OUTPUT
   update:
     name: Run ETL for update
+    needs: make_range
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
       max-parallel: ${{ inputs.max-parallel }}
       matrix:
-        alpha: ${{ fromJson(inputs.alpha) }} 
+        alpha: ${{ fromJson(needs.make_range.outputs.range) }}
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
