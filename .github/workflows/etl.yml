@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 jobs:
   get_time:
-    uses: ./.github/workflows/jobs/init_etl_time.yml
+    uses: ./.github/workflows/etl_init_time.yml
   update_package_names:
     runs-on: ubuntu-latest
     steps:
