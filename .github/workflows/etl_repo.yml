@@ -152,10 +152,13 @@ jobs:
         with:
           github_token: ${{ secrets.PERSONAL_TOKEN }}
           branch: main
-  merge_branches_in_one_shot:
+  merge_repo_info_branches:
     name: merge all feature branches onto main branch 
     needs: update_repo_info
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        split_cnt: [50]
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
@@ -188,13 +191,19 @@ jobs:
         run: |
           git config --global user.name "jeffrey82221"
           git config --global user.email "jeffrey82221@gmail.com"
-          for ((i=0; i<5; i++)); 
+          for ((i=0; i<${{ matrix.split_cnt }}; i++)); 
             do 
              git fetch origin ${{ steps.branch.outputs.name }}-$i;
              git switch ${{ steps.branch.outputs.name }}-$i;
              git switch main
+             git pull origin main
              git merge ${{ steps.branch.outputs.name }}-$i --allow-unrelated-histories --strategy-option theirs
              git push origin main
+          done
+      - name: delete feature branches
+        run: |
+          for ((i=0; i<${{ matrix.split_cnt }}; i++));
+            do
              git push origin --delete ${{ steps.branch.outputs.name }}-$i
           done
 
