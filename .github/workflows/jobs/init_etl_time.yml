@@ -1,9 +1,6 @@
 name: init_time
 on:
   workflow_call:
-    inputs:
-      retention-days:
-        required: true
 jobs:
   get_time:
     name: Get execution time
