@@ -43,13 +43,13 @@ jobs:
           n=${{ inputs.split_cnt-1 }}
           string="["
           for ((i=0; i<n; i++)); do
-            if [ $i -eq $n ]; then
+            if [ $i -eq $((n-1)) ]; then
               string+="$i]"
             else
-              string+="$i, "
+              string+="$i,"
             fi
           done
-          echo "$string"
+          echo $string
           echo "range=$string" >> $GITHUB_OUTPUT
   update:
     name: Run ETL for update
