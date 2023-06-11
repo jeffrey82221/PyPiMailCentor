@@ -6,8 +6,6 @@ on:
 jobs:
   get_time:
     uses: ./.github/workflows/jobs/init_etl_time.yml
-    with: 
-      retention-days: 3
   update_package_names:
     runs-on: ubuntu-latest
     steps:
