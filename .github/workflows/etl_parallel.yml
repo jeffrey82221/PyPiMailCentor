@@ -38,9 +38,13 @@ jobs:
     outputs:
       range: ${{ steps.create_range.outputs.range }}
     steps:
-      - id: create_range
+      - name: create range
+        id: create_range
+        env: 
+          LOOP_CNT: "${{ inputs.split_cnt }}"
         run: |
-          n='${{ inputs.split_cnt-1 }}'
+          n=$LOOP_CNT
+          echo "n=$n"
           string="["
           for ((i=0; i<n; i++)); do
             if [ $i -eq $((n-1)) ]; then
