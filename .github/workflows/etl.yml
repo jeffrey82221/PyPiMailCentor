@@ -176,7 +176,7 @@ jobs:
           done
   list_latest_json:
     name: List the Downloaded Latest Json(s)
-    needs: merge_branches_in_one_shot
+    needs: merge_latest_branches
     runs-on: ubuntu-latest
     steps:
       - name: checkout
