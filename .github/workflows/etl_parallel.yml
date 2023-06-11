@@ -4,7 +4,7 @@ on:
     inputs:
       alpha: 
         required: true
-        type: array
+        type: string
       split_cnt:
         required: true
         type: number
