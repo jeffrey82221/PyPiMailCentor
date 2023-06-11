@@ -116,6 +116,9 @@ jobs:
     name: Merge Infos 
     needs: update_repo_info
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        split_cnt: [50]
     steps:
       - name: checkout 
         uses: actions/checkout@v3
@@ -134,7 +137,9 @@ jobs:
       - name: Merge jsonl
         run: |
           rm -f data/repo_info.jsonl
-          cat download/{0..49}/info.jsonl >> data/repo_info.jsonl
+          end=$((${{ matrix.split_cnt }}-1))
+          echo "end=$end"
+          cat download/{0..end}/info.jsonl >> data/repo_info.jsonl
       - name: Git commit
         run: |
           git config --global user.name "jeffrey82221"
