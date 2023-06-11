@@ -4,16 +4,16 @@ on:
     inputs:
       alpha: 
         required: true
-        type: string
+        type: array
       split_cnt:
         required: true
-        type: string
+        type: number
       branch_title:
         required: true
         type: string
       max-parallel:
         required: true
-        type: string
+        type: number
       package-install-command:
         required: true
         type: string
@@ -91,7 +91,7 @@ jobs:
           rm -f /home/runner/work/PyPiMailCentor/PyPiMailCentor/.git/index.lock
           git config --global user.name "jeffrey82221"
           git config --global user.email "jeffrey82221@gmail.com"
-          ${{ inputs.git-add-command s}}
+          ${{ inputs.git-add-command }}
           git diff-index --quiet HEAD || git commit -m '${{ matrix.branch_title}}: (${{ steps.current-time.outputs.time }}-${{ matrix.alpha }})'
       - name: Push - Jsons
         uses: ad-m/github-push-action@master
