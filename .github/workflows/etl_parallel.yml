@@ -7,20 +7,28 @@ on:
         type: string
       split_cnt:
         required: true
+        type: string
       branch_title:
         required: true
+        type: string
       max-parallel:
         required: true
+        type: string
       package-install-command:
         required: true
+        type: string
       main-python-file:
         required: true
+        type: string
       input-menu-file:
         required: true
+        type: string
       upload-output-path:
         required: true
+        type: string
       git-add-command:
         required: true
+        type: string
 jobs:
   update:
     name: Run ETL for update
