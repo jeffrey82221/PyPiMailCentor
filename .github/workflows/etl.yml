@@ -5,25 +5,9 @@ on:
   workflow_dispatch:
 jobs:
   get_time:
-    name: Get execution time
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Get current time
-        uses: josStorer/get-current-time@v2
-        id: current-time
-        with:
-          format: YYYY-MM-DD-HH
-          utcOffset: "+08:00"
-      - name: write current time to file
-        env:
-          F_TIME: "${{ steps.current-time.outputs.formattedTime }}"
-        run: echo $F_TIME >> ./current-time.txt
-      - name: Upload current time
-        uses: actions/upload-artifact@v3
-        with:
-          name: "current-time"
-          path: ./current-time.txt
-          retention-days: 3
+    uses: ./.github/workflows/jobs/init_etl_time.yml
+    with: 
+      retention-days: 3
   update_package_names:
     runs-on: ubuntu-latest
     steps:
