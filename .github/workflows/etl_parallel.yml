@@ -56,7 +56,7 @@ jobs:
           echo $string
           echo "range=$string" >> $GITHUB_OUTPUT
   update:
-    name: Run ETL for update
+    name: Run update
     needs: make_range
     runs-on: ubuntu-20.04
     strategy:
