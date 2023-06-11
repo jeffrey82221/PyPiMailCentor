@@ -1,0 +1,149 @@
+name: parallel
+on:
+  workflow_call:
+    inputs:
+      alpha: 
+        required: true
+        type: choice
+      split_cnt:
+        required: true
+      branch_title:
+        required: true
+      max-parallel:
+        required: true
+      package-install-command:
+        required: true
+      main-python-file:
+        required: true
+      input-menu-file:
+        required: true
+      upload-output-path:
+        required: true
+      git-add-command:
+        required: true
+jobs:
+  update:
+    name: Run ETL for update
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+      max-parallel: ${{ inputs.max-parallel }}
+      matrix:
+        alpha: ${{ inputs.alpha }}
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+      - name: Download current time
+        uses: actions/download-artifact@v3
+        with:
+          name: "current-time"
+          path: ./current-time
+      - name: Use current time
+        id: current-time
+        run: echo "time=$(cat ./current-time/current-time.txt)" >> $GITHUB_OUTPUT
+      - name: set branch name
+        id: branch
+        env: 
+          BRANCH: "${{ inputs.branch_title }}/${{ steps.current-time.outputs.time }}-${{ matrix.alpha }}"
+        run: |
+          echo "$BRANCH"
+          echo "name=$BRANCH" >> $GITHUB_OUTPUT
+      - name: create new branch
+        uses: peterjgrainger/action-create-branch@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        with:
+          sha: '${{github.sha}}'
+          branch: 'refs/heads/${{ steps.branch.outputs.name }}'
+      - name: checkout feature branch
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: '${{ steps.branch.outputs.name }}'
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: github.com
+      - name: Set Up Python 
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+      - name: Run install 
+        run: ${{ inputs.package-install-command }}
+      - name: Run update script (@specific)
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          timeout_minutes: 180
+          command: python ${{ inputs.main-python-file }} ${{ inputs.input-menu-file }} ${{ matrix.alpha }} ${{ inputs.split_cnt }}
+      - name: Git Commit - Jsons (@specific commit-files)
+        run: |
+          rm -f /home/runner/work/PyPiMailCentor/PyPiMailCentor/.git/index.lock
+          git config --global user.name "jeffrey82221"
+          git config --global user.email "jeffrey82221@gmail.com"
+          ${{ inputs.git-add-command s}}
+          git diff-index --quiet HEAD || git commit -m '${{ matrix.branch_title}}: (${{ steps.current-time.outputs.time }}-${{ matrix.alpha }})'
+      - name: Push - Jsons
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PERSONAL_TOKEN }}
+          branch: '${{ steps.branch.outputs.name }}'
+      - name: Upload Tmp
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{ matrix.alpha }}"
+          path: ${{ inputs.upload-output-path }}
+          retention-days: 5
+  merge_branches:
+    name: merge all feature branches onto main branch 
+    needs: update
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+      - name: Download current time
+        uses: actions/download-artifact@v3
+        with:
+          name: "current-time"
+          path: ./current-time
+      - name: Use current time
+        id: current-time
+        run: echo "time=$(cat ./current-time/current-time.txt)" >> $GITHUB_OUTPUT
+      - name: set branch name
+        id: branch
+        env: 
+          BRANCH: "${{ inputs.branch_title }}/${{ steps.current-time.outputs.time }}"
+        run: |
+          echo "$BRANCH"
+          echo "name=$BRANCH" >> $GITHUB_OUTPUT
+      - name: checkout main
+        uses: actions/checkout@v3
+        with:
+          ref: 'main'
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: github.com
+      - name: fetch -> merge -> push
+        run: |
+          git config --global user.name "jeffrey82221"
+          git config --global user.email "jeffrey82221@gmail.com"
+          for ((i=0; i<${{ inputs.split_cnt }}; i++)); 
+            do 
+             git fetch origin ${{ steps.branch.outputs.name }}-$i;
+             git switch ${{ steps.branch.outputs.name }}-$i;
+             git switch main
+             git pull origin main
+             git merge ${{ steps.branch.outputs.name }}-$i --allow-unrelated-histories --strategy-option theirs
+             git push origin main
+          done
+      - name: delete feature branches
+        run: |
+          for ((i=0; i<${{ inputs.split_cnt }}; i++));
+            do
+             git push origin --delete ${{ steps.branch.outputs.name }}-$i
+          done

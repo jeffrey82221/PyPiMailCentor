@@ -8,9 +8,26 @@ jobs:
     uses: ./.github/workflows/etl_get_time.yml
   update_package_names:
     uses: ./.github/workflows/etl_update_package_names.yml
+  experiment-parallel:
+    name: Experiment with parallel ETL
+    needs: get_time
+    uses: ./.github/workflows/etl_parallel.yml
+    with: 
+      alpha: [0, 1, 2, 3, 4, 5]
+      split_cnt: 20
+      branch_title: update_latest
+      max-parallel: 20
+      package-install-command: |
+        pip install requests==2.28.2
+        pip install tqdm
+        pip install cryptography
+      main-python-file: update_latest_all.py
+      input-menu-file: data/package.menu
+      upload-output-path: data/latest/
+      git-add-command: git add data/latest/ etag/latest/
   update_latest_jsons:
     name: Update Latest Json(s)
-    needs: [update_package_names, get_time]
+    needs: [update_package_names, get_time, experiment-parallel]
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
