@@ -5,25 +5,7 @@ on:
   workflow_dispatch:
 jobs:
   get_time:
-    name: Get execution time
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Get current time
-        uses: josStorer/get-current-time@v2
-        id: current-time
-        with:
-          format: YYYY-MM-DD-HH
-          utcOffset: "+08:00"
-      - name: write current time to file
-        env:
-          F_TIME: "${{ steps.current-time.outputs.formattedTime }}"
-        run: echo $F_TIME >> ./current-time.txt
-      - name: Upload current time
-        uses: actions/upload-artifact@v3
-        with:
-          name: "current-time"
-          path: ./current-time.txt
-          retention-days: 3
+    uses: ./.github/workflows/etl_get_time.yml
   update_repo_info:
     name: Update Repo Info
     needs: get_time
@@ -34,6 +16,7 @@ jobs:
       matrix:
         alpha: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
         split_cnt: [50]
+        branch_title: [update_repo_info]
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
@@ -52,7 +35,7 @@ jobs:
       - name: set branch name
         id: branch
         env: 
-          BRANCH: "update_repo_info/${{ steps.current-time.outputs.time }}-${{ matrix.alpha }}"
+          BRANCH: "${{ matrix.branch_title }}/${{ steps.current-time.outputs.time }}-${{ matrix.alpha }}"
         run: |
           echo "$BRANCH"
           echo "name=$BRANCH" >> $GITHUB_OUTPUT
@@ -74,7 +57,9 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: '3.9'
-      - name: Run install
+      - name: Insert PAT (@specific - before etl)
+        run: echo ${{ secrets.PERSONAL_TOKEN }} >> pat.key
+      - name: Run install (@specific)
         run: |
           pip install requests==2.28.2
           pip install tqdm
@@ -82,21 +67,19 @@ jobs:
           pip install toolz
           pip install cytoolz==0.12.1
           pip install httpx==0.23.0
-      - name: Insert PAT
-        run: echo ${{ secrets.PERSONAL_TOKEN }} >> pat.key
-      - name: Run update script
+      - name: Run update script (@specific)
         uses: nick-fields/retry@v2
         with:
           max_attempts: 3
           timeout_minutes: 180
           command: python update_repo_info_all.py data/latest.menu ${{ matrix.alpha }} ${{ matrix.split_cnt }}
-      - name: Upload Tmp Jsonl
+      - name: Upload Tmp Jsonl (@specific - after etl)
         uses: actions/upload-artifact@v3
         with:
           name: "${{ matrix.alpha }}"
           path: /tmp/info.jsonl
           retention-days: 5
-      - name: Git Commit - Jsons
+      - name: Git Commit - Jsons (@specific commit-files)
         run: |
           rm -f /home/runner/work/PyPiMailCentor/PyPiMailCentor/.git/index.lock
           git config --global user.name "jeffrey82221"
@@ -106,7 +89,7 @@ jobs:
           git add data/star
           git add data/watcher
           git add etag/
-          git diff-index --quiet HEAD || git commit -m 'update: github api etag and response (${{ steps.current-time.outputs.time }}-${{ matrix.alpha }})'
+          git diff-index --quiet HEAD || git commit -m '${{ matrix.branch_title}}: (${{ steps.current-time.outputs.time }}-${{ matrix.alpha }})'
       - name: Push - Jsons
         uses: ad-m/github-push-action@master
         with:
