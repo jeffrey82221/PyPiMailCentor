@@ -29,12 +29,11 @@ on:
       git-add-command:
         required: true
         type: string
+    secrets:
       pat:
         required: true
-        type: string 
       ssh-private-key:
         required: true
-        type: string
 jobs:
   update:
     name: Run ETL for update
@@ -69,7 +68,7 @@ jobs:
       - name: create new branch
         uses: peterjgrainger/action-create-branch@v2.3.0
         env:
-          GITHUB_TOKEN: ${{ inputs.pat }}
+          GITHUB_TOKEN: ${{ secrets.pat }}
         with:
           sha: '${{github.sha}}'
           branch: 'refs/heads/${{ steps.branch.outputs.name }}'
@@ -78,7 +77,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: '${{ steps.branch.outputs.name }}'
-          ssh-key: ${{ inputs.ssh-private-key }}
+          ssh-key: ${{ secrets.ssh-private-key }}
           ssh-known-hosts: github.com
       - name: Set Up Python 
         uses: actions/setup-python@v3
@@ -102,7 +101,7 @@ jobs:
       - name: Push - Jsons
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ inputs.pat }}
+          github_token: ${{ secrets.pat }}
           branch: '${{ steps.branch.outputs.name }}'
       - name: Upload Tmp
         uses: actions/upload-artifact@v3
@@ -140,7 +139,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: 'main'
-          ssh-key: ${{ inputs.ssh-private-key }}
+          ssh-key: ${{ secrets.ssh-private-key }}
           ssh-known-hosts: github.com
       - name: fetch -> merge -> push
         run: |
