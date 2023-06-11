@@ -185,6 +185,12 @@ jobs:
              git merge ${{ steps.branch.outputs.name }}-$i --allow-unrelated-histories --strategy-option theirs
              git push origin main
           done
+      - name: delete feature branches
+        run: |
+          for ((i=0; i<${{ matrix.split_cnt }}; i++));
+            do
+             git push origin --delete ${{ steps.branch.outputs.name }}-$i
+          done
   list_latest_json:
     name: List the Downloaded Latest Json(s)
     needs: merge_branches_in_one_shot
