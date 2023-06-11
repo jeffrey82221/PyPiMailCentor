@@ -4,7 +4,7 @@ on:
     inputs:
       alpha: 
         required: true
-        type: choice
+        type: string
       split_cnt:
         required: true
       branch_title:

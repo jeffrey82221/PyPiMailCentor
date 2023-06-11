@@ -13,7 +13,7 @@ jobs:
     needs: get_time
     uses: ./.github/workflows/etl_parallel.yml
     with: 
-      alpha: [0, 1, 2, 3, 4, 5]
+      alpha: "[0, 1, 2, 3, 4, 5]"
       split_cnt: 20
       branch_title: update_latest
       max-parallel: 20
