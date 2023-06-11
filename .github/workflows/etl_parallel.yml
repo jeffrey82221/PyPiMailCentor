@@ -40,7 +40,7 @@ jobs:
     steps:
       - id: create_range
         run: |
-          n=${{ inputs.split_cnt-1 }}
+          n='${{ inputs.split_cnt-1 }}'
           string="["
           for ((i=0; i<n; i++)); do
             if [ $i -eq $((n-1)) ]; then
