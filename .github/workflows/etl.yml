@@ -23,8 +23,8 @@ jobs:
       input-menu-file: data/package.menu
       upload-output-path: data/latest/
       git-add-command: git add data/latest/ etag/latest/
-      PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      pat: ${{ secrets.PERSONAL_TOKEN }}
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
   update_package_names:
     needs: experiment-parallel
     uses: ./.github/workflows/etl_update_package_names.yml
