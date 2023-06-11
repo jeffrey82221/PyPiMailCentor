@@ -136,10 +136,14 @@ jobs:
         with:
           github_token: ${{ secrets.PERSONAL_TOKEN }}
           branch: '${{ steps.branch.outputs.name }}'
-  merge_branches_in_one_shot:
+  merge_latest_branches:
     name: merge all feature branches onto main branch 
     needs: update_latest_jsons
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        branch_title: [update_latest]
+        split_cnt: [20]
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
@@ -158,7 +162,7 @@ jobs:
       - name: set branch name
         id: branch
         env: 
-          BRANCH: "update_latest/${{ steps.current-time.outputs.time }}"
+          BRANCH: "${{ matrix.branch_title }}/${{ steps.current-time.outputs.time }}"
         run: |
           echo "$BRANCH"
           echo "name=$BRANCH" >> $GITHUB_OUTPUT
@@ -172,14 +176,14 @@ jobs:
         run: |
           git config --global user.name "jeffrey82221"
           git config --global user.email "jeffrey82221@gmail.com"
-          for ((i=0; i<5; i++)); 
+          for ((i=0; i<${{ matrix.split_cnt }}; i++)); 
             do 
              git fetch origin ${{ steps.branch.outputs.name }}-$i;
              git switch ${{ steps.branch.outputs.name }}-$i;
              git switch main
+             git pull origin main
              git merge ${{ steps.branch.outputs.name }}-$i --allow-unrelated-histories --strategy-option theirs
              git push origin main
-             git push origin --delete ${{ steps.branch.outputs.name }}-$i
           done
   list_latest_json:
     name: List the Downloaded Latest Json(s)
