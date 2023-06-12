@@ -27,6 +27,7 @@ jobs:
       passing-tmp-file: false
       result-path: data/latest.menu
       result-merge-command: ls data/latest/ | grep .json
+      fast-debug: true
     secrets:
       pat: ${{ secrets.PERSONAL_TOKEN }}
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
