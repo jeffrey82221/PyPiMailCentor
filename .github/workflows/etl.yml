@@ -24,45 +24,15 @@ jobs:
       main-python-file: update_latest_all.py
       input-menu-file: data/package.menu
       git-add-command: git add data/latest/ etag/latest/
+      passing-tmp-file: false
+      tmp-merging-script: ls data/latest/ | grep .json
+      final-result-path: data/latest.menu
     secrets:
       pat: ${{ secrets.PERSONAL_TOKEN }}
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-  list_latest_json:
-    name: List the Downloaded Latest Json(s)
-    needs: update_latest_json
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          ref: 'main'
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: github.com
-      - name: build_menu
-        run: |
-          rm -f data/latest.menu
-          ls data/latest/ | grep .json >> data/latest.menu
-      - name: Git commit
-        run: |
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
-          git add data/latest.menu
-          git diff-index --quiet HEAD || git commit -m 'update: latest menu'
-      - name: Git pull
-        run: |
-          git config --global user.email "jeffrey82221@gmail.com"
-          git config --global user.name "jeffrey82221"
-          git config pull.rebase false
-          git pull origin main || echo 'pull failed'
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PERSONAL_TOKEN }}
-          branch: main
   update_release_time:
     name: Do Release Time Table ETL
-    needs: list_latest_json
+    needs: update_latest_json
     runs-on: ubuntu-latest
     steps:
       - name: checkout 
@@ -121,51 +91,10 @@ jobs:
       main-python-file: update_repo_info_all.py
       input-menu-file: data/latest.menu
       git-add-command: git add data/fork data/repo data/star data/watcher etag/
+      passing-tmp-file: true
+      tmp-upload-path: /tmp/info.jsonl
+      tmp-merging-script: cat download/{0..$end}/info.jsonl
+      final-result-path: data/repo_info.jsonl
     secrets:
       pat: ${{ secrets.PERSONAL_TOKEN }}
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-  merge_repo_infos:
-    name: Merge Infos 
-    needs: update_repo_info
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        split_cnt: [50]
-    steps:
-      - name: checkout 
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          ref: 'main'
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: github.com
-      - name: Download Jsonls
-        uses: actions/download-artifact@v3
-        with:
-          path: download
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: download
-      - name: Merge jsonl
-        run: |
-          rm -f data/repo_info.jsonl
-          end=$((${{ matrix.split_cnt }}-1))
-          echo "end=$end"
-          cat download/{0..end}/info.jsonl >> data/repo_info.jsonl
-      - name: Git commit
-        run: |
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
-          git add data/repo_info.jsonl
-          git diff-index --quiet HEAD || git commit -m 'update: email content'
-      - name: Git pull
-        run: |
-          git config --global user.email "jeffrey82221@gmail.com"
-          git config --global user.name "jeffrey82221"
-          git config pull.rebase false
-          git pull origin main || echo 'pull failed'
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PERSONAL_TOKEN }}
-          branch: main
