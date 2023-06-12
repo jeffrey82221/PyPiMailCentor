@@ -7,11 +7,10 @@ jobs:
   get_time:
     uses: ./.github/workflows/etl_get_time.yml
   update_package_names:
-    needs: get_time
     uses: ./.github/workflows/etl_update_package_names.yml
   update_latest_json:
     name: Update Latest Json
-    needs: update_package_names
+    needs: [update_package_names, get_time]
     uses: ./.github/workflows/etl_parallel.yml
     with: 
       split_cnt: 20
@@ -35,7 +34,7 @@ jobs:
       user-email: jeffrey82221@gmail.com
   update_repo_info:
     name: Update Repo Info Json
-    needs: update_latest_json
+    needs: [update_latest_json, get_time]
     uses: ./.github/workflows/etl_parallel.yml
     with: 
       split_cnt: 50
