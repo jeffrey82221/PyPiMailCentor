@@ -5,185 +5,31 @@ on:
   workflow_dispatch:
 jobs:
   get_time:
-    name: Get execution time
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Get current time
-        uses: josStorer/get-current-time@v2
-        id: current-time
-        with:
-          format: YYYY-MM-DD-HH
-          utcOffset: "+08:00"
-      - name: write current time to file
-        env:
-          F_TIME: "${{ steps.current-time.outputs.formattedTime }}"
-        run: echo $F_TIME >> ./current-time.txt
-      - name: Upload current time
-        uses: actions/upload-artifact@v3
-        with:
-          name: "current-time"
-          path: ./current-time.txt
-          retention-days: 3
+    uses: ./.github/workflows/etl_get_time.yml
   update_package_names:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout 
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          ref: 'main'
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: github.com
-      - name: Set Up Python 
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.9'
-      - name: Install package
-        run: |
-          pip install beautifulsoup4==4.12.0
-          pip install requests==2.28.2
-      - name: Run update script
-        run : |
-         ls
-         python update_package_names.py
-      - name: Git Commit 
-        run: |
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
-          git add data
-          git diff-index --quiet HEAD || git commit -m 'update: package names'
-      - name: Git pull
-        run: | 
-          git config --global user.email "jeffrey82221@gmail.com"
-          git config --global user.name "jeffrey82221"
-          git config --global http.postBuffer 1048576000
-          git config pull.rebase false
-          git pull origin main || echo 'pull failed'
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PERSONAL_TOKEN }}
-          branch: main
-  update_latest_jsons:
-    name: Update Latest Json(s)
-    needs: [update_package_names, get_time]
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        alpha: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-        split_cnt: [20]
-    steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
-      - name: Download current time
-        uses: actions/download-artifact@v3
-        with:
-          name: "current-time"
-          path: ./current-time
-      - name: Use current time
-        id: current-time
-        run: echo "time=$(cat ./current-time/current-time.txt)" >> $GITHUB_OUTPUT
-      - name: set branch name
-        id: branch
-        env: 
-          BRANCH: "update_latest/${{ steps.current-time.outputs.time }}-${{ matrix.alpha }}"
-        run: |
-          echo "$BRANCH"
-          echo "name=$BRANCH" >> $GITHUB_OUTPUT
-      - name: create new branch
-        uses: peterjgrainger/action-create-branch@v2.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-        with:
-          sha: '${{github.sha}}'
-          branch: 'refs/heads/${{ steps.branch.outputs.name }}'
-      - name: checkout feature branch
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: '${{ steps.branch.outputs.name }}'
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: github.com
-      - name: Set Up Python 
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.9'
-      - name: Run install
-        run: |
-          pip install requests==2.28.2
-          pip install tqdm
-          pip install cryptography
-      - name: Run update script
-        uses: nick-fields/retry@v2
-        with:
-          max_attempts: 3
-          timeout_minutes: 180
-          command: python update_latest_all.py data/package.menu ${{ matrix.alpha }} ${{ matrix.split_cnt }}
-      - name: Git Commit - Jsons
-        run: |
-          rm -f /home/runner/work/PyPiMailCentor/PyPiMailCentor/.git/index.lock
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
-          git add data/latest/
-          git add etag/latest/
-          git diff-index --quiet HEAD || git commit -m 'update: package latest json (${{ steps.current-time.outputs.time }}-${{ matrix.alpha }})'
-      - name: Push - Jsons
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PERSONAL_TOKEN }}
-          branch: '${{ steps.branch.outputs.name }}'
-  merge_branches_in_one_shot:
-    name: merge all feature branches onto main branch 
-    needs: update_latest_jsons
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
-      - name: Download current time
-        uses: actions/download-artifact@v3
-        with:
-          name: "current-time"
-          path: ./current-time
-      - name: Use current time
-        id: current-time
-        run: echo "time=$(cat ./current-time/current-time.txt)" >> $GITHUB_OUTPUT
-      - name: set branch name
-        id: branch
-        env: 
-          BRANCH: "update_latest/${{ steps.current-time.outputs.time }}"
-        run: |
-          echo "$BRANCH"
-          echo "name=$BRANCH" >> $GITHUB_OUTPUT
-      - name: checkout main
-        uses: actions/checkout@v3
-        with:
-          ref: 'main'
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: github.com
-      - name: fetch -> merge -> push
-        run: |
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
-          for ((i=0; i<5; i++)); 
-            do 
-             git fetch origin ${{ steps.branch.outputs.name }}-$i;
-             git switch ${{ steps.branch.outputs.name }}-$i;
-             git switch main
-             git merge ${{ steps.branch.outputs.name }}-$i --allow-unrelated-histories --strategy-option theirs
-             git push origin main
-             git push origin --delete ${{ steps.branch.outputs.name }}-$i
-          done
+    needs: get_time
+    uses: ./.github/workflows/etl_update_package_names.yml
+  update_latest_json:
+    name: Update Latest Json
+    needs: update_package_names
+    uses: ./.github/workflows/etl_parallel.yml
+    with: 
+      split_cnt: 20
+      branch_title: update_latest
+      max-parallel: 20
+      package-install-command: |
+        pip install requests==2.28.2
+        pip install tqdm
+        pip install cryptography
+      main-python-file: update_latest_all.py
+      input-menu-file: data/package.menu
+      git-add-command: git add data/latest/ etag/latest/
+    secrets:
+      pat: ${{ secrets.PERSONAL_TOKEN }}
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
   list_latest_json:
     name: List the Downloaded Latest Json(s)
-    needs: merge_branches_in_one_shot
+    needs: merge_latest_branches
     runs-on: ubuntu-latest
     steps:
       - name: checkout
