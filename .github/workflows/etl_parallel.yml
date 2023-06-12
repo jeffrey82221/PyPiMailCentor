@@ -23,14 +23,20 @@ on:
       git-add-command:
         required: true
         type: string
-      passing-result-file:
+      passing-tmp-file:
         required: false
         type: boolean
         default: false
-      result-upload-path:
+      tmp-upload-path:
         required: false
         type: string
-        default: tmp/
+        default: /tmp/info.jsonl
+      tmp-merging-script:
+        required: true
+        type: string
+      final-result-path:
+        required: true
+        type: string
     secrets:
       pat:
         required: true
@@ -130,11 +136,11 @@ jobs:
           github_token: ${{ secrets.pat }}
           branch: '${{ steps.branch.outputs.name }}'
       - name: Upload Result
-        if: ${{ inputs.passing-result-file }}
+        if: ${{ inputs.passing-tmp-file }}
         uses: actions/upload-artifact@v3
         with:
           name: "${{ matrix.alpha }}"
-          path: ${{ inputs.result-upload-path }}
+          path: ${{ inputs.tmp-upload-path }}
           retention-days: 5
   merge_branches:
     name: merge all feature branches onto main branch 
@@ -187,3 +193,47 @@ jobs:
             do
              git push origin --delete ${{ steps.branch.outputs.name }}-$i
           done
+  merge_tmp_as_result:
+    name: Merge Tmp Files into Result File 
+    needs: merge_branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout 
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ref: 'main'
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: github.com
+      - name: Download Tmp Files
+        if: ${{ inputs.passing-tmp-file }}
+        uses: actions/download-artifact@v3
+        with:
+          path: download
+      - name: Display structure of downloaded files
+        if: ${{ inputs.passing-tmp-file }}
+        run: ls -R
+        working-directory: download
+      - name: Merge jsonl
+        run: |
+          rm -f ${{ inputs.final-result-path }}
+          end=$((${{ inputs.split_cnt }}-1))
+          echo "end=$end"
+          ${{ inputs.tmp-merging-script }} >> ${{ inputs.final-result-path }}
+      - name: Git commit
+        run: |
+          git config --global user.name "jeffrey82221"
+          git config --global user.email "jeffrey82221@gmail.com"
+          git add ${{ inputs.final-result-path }}
+          git diff-index --quiet HEAD || git commit -m 'update_result: ${{ inputs.final-result-path }}'
+      - name: Git pull
+        run: |
+          git config --global user.email "jeffrey82221@gmail.com"
+          git config --global user.name "jeffrey82221"
+          git config pull.rebase false
+          git pull origin main || echo 'pull failed'
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PERSONAL_TOKEN }}
+          branch: main
