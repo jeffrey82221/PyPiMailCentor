@@ -129,11 +129,12 @@ jobs:
         with:
           github_token: ${{ secrets.pat }}
           branch: '${{ steps.branch.outputs.name }}'
-      - name: Upload Tmp
+      - name: Upload Result
+        if: ${{ inputs.passing-result-file }}
         uses: actions/upload-artifact@v3
         with:
           name: "${{ matrix.alpha }}"
-          path: ${{ inputs.upload-output-path }}
+          path: ${{ inputs.result-upload-path }}
           retention-days: 5
   merge_branches:
     name: merge all feature branches onto main branch 
