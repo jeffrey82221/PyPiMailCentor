@@ -42,6 +42,10 @@ on:
         required: true
       ssh-private-key:
         required: true
+      user-name:
+        required: true
+      user-email:
+        required: true
 jobs:
   make_range:
     name: Build Range
@@ -126,8 +130,8 @@ jobs:
       - name: Git Commit - Jsons (@specific commit-files)
         run: |
           rm -f /home/runner/work/PyPiMailCentor/PyPiMailCentor/.git/index.lock
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
+          git config --global user.name "${{ secrets.user-name }}"
+          git config --global user.email "${{ secrets.user-email }}"
           ${{ inputs.git-add-command }}
           git diff-index --quiet HEAD || git commit -m '${{ matrix.branch_title}}: (${{ steps.current-time.outputs.time }}-${{ matrix.alpha }})'
       - name: Push - Jsons
@@ -176,8 +180,8 @@ jobs:
           ssh-known-hosts: github.com
       - name: fetch -> merge -> push
         run: |
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
+          git config --global user.name "${{ secrets.user-name }}"
+          git config --global user.email "${{ secrets.user-email }}"
           for ((i=0; i<${{ inputs.split_cnt }}; i++)); 
             do 
              git fetch origin ${{ steps.branch.outputs.name }}-$i;
@@ -222,14 +226,12 @@ jobs:
           ${{ inputs.result-merge-command }} >> ${{ inputs.result-path }}
       - name: Git commit
         run: |
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
+          git config --global user.name "${{ secrets.user-name }}"
+          git config --global user.email "${{ secrets.user-email }}"
           git add ${{ inputs.result-path }}
           git diff-index --quiet HEAD || git commit -m 'result: ${{ inputs.result-path }}'
       - name: Git pull
         run: |
-          git config --global user.email "jeffrey82221@gmail.com"
-          git config --global user.name "jeffrey82221"
           git config pull.rebase false
           git pull origin main || echo 'pull failed'
       - name: Push changes
