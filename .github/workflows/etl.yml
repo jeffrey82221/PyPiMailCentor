@@ -29,7 +29,7 @@ jobs:
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
   list_latest_json:
     name: List the Downloaded Latest Json(s)
-    needs: merge_latest_branches
+    needs: update_latest_json
     runs-on: ubuntu-latest
     steps:
       - name: checkout
