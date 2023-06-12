@@ -37,6 +37,14 @@ on:
       result-merge-command:
         required: true
         type: string
+      fast-debug:
+        required: false
+        type: boolean
+        default: false
+      debug-cnt:
+        required: false
+        type: number
+        default: 2
     secrets:
       pat:
         required: true
@@ -56,9 +64,16 @@ jobs:
       - name: create range
         id: create_range
         env: 
+          FAST_DEBUG: "${{ inputs.fast-debug }}"
           LOOP_CNT: "${{ inputs.split_cnt }}"
+          DEBUG_CNT: "${{ inputs.debug-cnt }}"
         run: |
-          n=$LOOP_CNT
+          CONDITION=$FAST_DEBUG
+          if $CONDITION; then
+            n=$LOOP_CNT
+          else
+            n=$DEBUG_CNT
+          fi
           echo "n=$n"
           string="["
           for ((i=0; i<n; i++)); do
@@ -179,10 +194,21 @@ jobs:
           ssh-key: ${{ secrets.ssh-private-key }}
           ssh-known-hosts: github.com
       - name: fetch -> merge -> push
+        env: 
+          FAST_DEBUG: "${{ inputs.fast-debug }}"
+          LOOP_CNT: "${{ inputs.split_cnt }}"
+          DEBUG_CNT: "${{ inputs.debug-cnt }}"
         run: |
           git config --global user.name "${{ secrets.user-name }}"
           git config --global user.email "${{ secrets.user-email }}"
-          for ((i=0; i<${{ inputs.split_cnt }}; i++)); 
+          CONDITION=$FAST_DEBUG
+          if $CONDITION; then
+            n=$LOOP_CNT
+          else
+            n=$DEBUG_CNT
+          fi
+          echo "n=$n"
+          for ((i=0; i<n; i++)); 
             do 
              git fetch origin ${{ steps.branch.outputs.name }}-$i;
              git switch ${{ steps.branch.outputs.name }}-$i;
@@ -192,8 +218,19 @@ jobs:
              git push origin main
           done
       - name: delete feature branches
+        env: 
+          FAST_DEBUG: "${{ inputs.fast-debug }}"
+          LOOP_CNT: "${{ inputs.split_cnt }}"
+          DEBUG_CNT: "${{ inputs.debug-cnt }}"
         run: |
-          for ((i=0; i<${{ inputs.split_cnt }}; i++));
+          CONDITION=$FAST_DEBUG
+          if $CONDITION; then
+            n=$LOOP_CNT
+          else
+            n=$DEBUG_CNT
+          fi
+          echo "n=$n"
+          for ((i=0; i<n; i++));
             do
              git push origin --delete ${{ steps.branch.outputs.name }}-$i
           done
@@ -219,10 +256,21 @@ jobs:
         run: ls -R
         working-directory: download
       - name: Merge jsonl
+        env: 
+          FAST_DEBUG: "${{ inputs.fast-debug }}"
+          LOOP_CNT: "${{ inputs.split_cnt }}"
+          DEBUG_CNT: "${{ inputs.debug-cnt }}"
         run: |
-          rm -f ${{ inputs.result-path }}
-          end=$((${{ inputs.split_cnt }}-1))
+          CONDITION=$FAST_DEBUG
+          if $CONDITION; then
+            n=$LOOP_CNT
+          else
+            n=$DEBUG_CNT
+          fi
+          echo "n=$n"
+          end=$(($n-1))
           echo "end=$end"
+          rm -f ${{ inputs.result-path }}
           ${{ inputs.result-merge-command }} >> ${{ inputs.result-path }}
       - name: Git commit
         run: |
