@@ -139,7 +139,7 @@ jobs:
           rm -f data/repo_info.jsonl
           end=$((${{ matrix.split_cnt }}-1))
           echo "end=$end"
-          cat download/{0..end}/info.jsonl >> data/repo_info.jsonl
+          cat download/{0..$end}/info.jsonl >> data/repo_info.jsonl
       - name: Git commit
         run: |
           git config --global user.name "jeffrey82221"
