@@ -10,7 +10,7 @@ jobs:
     uses: ./.github/workflows/etl_update_package_names.yml
   update_latest_json:
     name: Update Latest Json
-    needs: [update_package_names, get_time]
+    needs: [get_time]
     uses: ./.github/workflows/etl_parallel.yml
     with: 
       split_cnt: 20
