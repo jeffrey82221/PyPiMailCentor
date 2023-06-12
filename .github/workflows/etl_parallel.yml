@@ -70,9 +70,9 @@ jobs:
         run: |
           CONDITION=$FAST_DEBUG
           if $CONDITION; then
-            n=$LOOP_CNT
-          else
             n=$DEBUG_CNT
+          else
+            n=$LOOP_CNT
           fi
           echo "n=$n"
           string="["
@@ -203,9 +203,9 @@ jobs:
           git config --global user.email "${{ secrets.user-email }}"
           CONDITION=$FAST_DEBUG
           if $CONDITION; then
-            n=$LOOP_CNT
-          else
             n=$DEBUG_CNT
+          else
+            n=$LOOP_CNT
           fi
           echo "n=$n"
           for ((i=0; i<n; i++)); 
@@ -225,9 +225,9 @@ jobs:
         run: |
           CONDITION=$FAST_DEBUG
           if $CONDITION; then
-            n=$LOOP_CNT
-          else
             n=$DEBUG_CNT
+          else
+            n=$LOOP_CNT
           fi
           echo "n=$n"
           for ((i=0; i<n; i++));
@@ -263,9 +263,9 @@ jobs:
         run: |
           CONDITION=$FAST_DEBUG
           if $CONDITION; then
-            n=$LOOP_CNT
-          else
             n=$DEBUG_CNT
+          else
+            n=$LOOP_CNT
           fi
           echo "n=$n"
           end=$(($n-1))
