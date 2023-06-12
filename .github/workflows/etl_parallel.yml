@@ -31,10 +31,10 @@ on:
         required: false
         type: string
         default: /tmp/info.jsonl
-      tmp-merging-script:
+      result-path:
         required: true
         type: string
-      final-result-path:
+      result-merge-command:
         required: true
         type: string
     secrets:
@@ -216,16 +216,16 @@ jobs:
         working-directory: download
       - name: Merge jsonl
         run: |
-          rm -f ${{ inputs.final-result-path }}
+          rm -f ${{ inputs.result-path }}
           end=$((${{ inputs.split_cnt }}-1))
           echo "end=$end"
-          ${{ inputs.tmp-merging-script }} >> ${{ inputs.final-result-path }}
+          ${{ inputs.result-merge-command }} >> ${{ inputs.result-path }}
       - name: Git commit
         run: |
           git config --global user.name "jeffrey82221"
           git config --global user.email "jeffrey82221@gmail.com"
-          git add ${{ inputs.final-result-path }}
-          git diff-index --quiet HEAD || git commit -m 'update_result: ${{ inputs.final-result-path }}'
+          git add ${{ inputs.result-path }}
+          git diff-index --quiet HEAD || git commit -m 'result: ${{ inputs.result-path }}'
       - name: Git pull
         run: |
           git config --global user.email "jeffrey82221@gmail.com"
