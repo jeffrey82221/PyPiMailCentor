@@ -4,7 +4,6 @@ on:
 jobs:
   update:
     name: Do Release Time Table ETL
-    needs: update_latest_json
     runs-on: ubuntu-latest
     steps:
       - name: checkout 
