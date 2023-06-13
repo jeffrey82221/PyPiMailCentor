@@ -136,14 +136,14 @@ jobs:
           python-version: '3.9'
       - name: Run install 
         run: ${{ inputs.package-install-command }}
+      - name: Insert PAT
+        run: echo ${{ secrets.pat }} >> pat.key
       - name: Run update script (@specific)
         uses: nick-fields/retry@v2
         with:
           max_attempts: 3
           timeout_minutes: 180
-          command:｜
-            echo ${{ secrets.pat }} >> pat.key
-            python ${{ inputs.main-python-file }} ${{ inputs.input-menu-file }} ${{ matrix.alpha }} ${{ inputs.split_cnt }}
+          command: python ${{ inputs.main-python-file }} ${{ inputs.input-menu-file }} ${{ matrix.alpha }} ${{ inputs.split_cnt }}
       - name: Git Commit - Jsons (@specific commit-files)
         run: |
           rm -f /home/runner/work/PyPiMailCentor/PyPiMailCentor/.git/index.lock
