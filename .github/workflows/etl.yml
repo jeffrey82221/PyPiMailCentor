@@ -7,7 +7,7 @@ jobs:
   get_time:
     uses: ./.github/workflows/etl_get_time.yml
   update_package_names:
-    uses: ./.github/workflows/etl_update_package_names.yml
+    uses: ./.github/workflows/etl_single.yml
     with:
       package-install-command: |
         pip install beautifulsoup4==4.12.0
