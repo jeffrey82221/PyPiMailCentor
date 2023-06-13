@@ -72,5 +72,18 @@ jobs:
       user-name: jeffrey82221
       user-email: jeffrey82221@gmail.com
   update_release_time:
-    needs: update_repo_info
-    uses: ./.github/workflows/etl_update_release_time.yml
+    # needs: update_latest_json
+    uses: ./.github/workflows/etl_single.yml
+    with:
+      package-install-command: |
+        pip install tqdm
+        pip install pandas==1.4.2
+        pip install pyarrow==8.0.0
+        pip install toolz
+      main-python-file: update_release_time.py
+      result-path: data/release_time
+    secrets:
+      pat: ${{ secrets.PERSONAL_TOKEN }}
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      user-name: jeffrey82221
+      user-email: jeffrey82221@gmail.com
