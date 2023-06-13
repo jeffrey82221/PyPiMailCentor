@@ -54,6 +54,7 @@ jobs:
       tmp-upload-path: /tmp/info.jsonl
       result-path: data/repo_info.jsonl
       result-merge-command: cat download/{0..$end}/info.jsonl
+      fast-debug: true
     secrets:
       pat: ${{ secrets.PERSONAL_TOKEN }}
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
