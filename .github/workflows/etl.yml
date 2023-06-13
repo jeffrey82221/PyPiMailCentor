@@ -8,6 +8,17 @@ jobs:
     uses: ./.github/workflows/etl_get_time.yml
   update_package_names:
     uses: ./.github/workflows/etl_update_package_names.yml
+    with:
+      package-install-command: |
+        pip install beautifulsoup4==4.12.0
+        pip install requests==2.28.2
+      main-python-file: update_package_names.py
+      git-add-command: git add data/package.menu
+    secrets:
+      pat: ${{ secrets.PERSONAL_TOKEN }}
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      user-name: jeffrey82221
+      user-email: jeffrey82221@gmail.com
   update_latest_json:
     name: Update Latest Json
     needs: [get_time]
