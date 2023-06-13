@@ -1,6 +1,25 @@
-name: Update Package Names
+name: Update Single Result
 on:
   workflow_call:
+    inputs:
+      package-install-command:
+        required: true
+        type: string
+      main-python-file:
+        required: true
+        type: string
+      result-path:
+        required: true
+        type: string
+    secrets:
+      pat:
+        required: true
+      ssh-private-key:
+        required: true
+      user-name:
+        required: true
+      user-email:
+        required: true
 jobs:
   update_package_names:
     runs-on: ubuntu-latest
@@ -10,34 +29,32 @@ jobs:
         with:
           fetch-depth: 1
           ref: 'main'
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-key: ${{ secrets.ssh-private-key }}
           ssh-known-hosts: github.com
       - name: Set Up Python 
         uses: actions/setup-python@v3
         with:
           python-version: '3.9'
       - name: Install package
-        run: |
-          pip install beautifulsoup4==4.12.0
-          pip install requests==2.28.2
+        run: ${{ inputs.package-install-command }}
       - name: Run update script
         run : |
-         python update_package_names.py
+         python ${{ inputs.main-python-file }}
       - name: Git Commit 
         run: |
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
-          git add data
-          git diff-index --quiet HEAD || git commit -m 'update: package names'
+          git config --global user.name "${{ secrets.user-name }}"
+          git config --global user.email "${{ secrets.user-email }}"
+          git add ${{ inputs.result-path }}
+          git diff-index --quiet HEAD || git commit -m 'update: ${{ inputs.result-path }}'
       - name: Git pull
         run: | 
-          git config --global user.email "jeffrey82221@gmail.com"
-          git config --global user.name "jeffrey82221"
+          git config --global user.name "${{ secrets.user-name }}"
+          git config --global user.email "${{ secrets.user-email }}"
           git config --global http.postBuffer 1048576000
           git config pull.rebase false
           git pull origin main || echo 'pull failed'
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.PERSONAL_TOKEN }}
+          github_token: ${{ secrets.pat }}
           branch: main
