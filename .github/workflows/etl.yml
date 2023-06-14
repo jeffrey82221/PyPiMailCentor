@@ -21,7 +21,7 @@ jobs:
       user-email: jeffrey82221@gmail.com
   update_latest_json:
     name: Update Latest Json
-    needs: [update_package_names, get_time]
+    needs: [get_time]
     uses: ./.github/workflows/etl_parallel.yml
     with: 
       split_cnt: 20
@@ -72,7 +72,7 @@ jobs:
       user-name: jeffrey82221
       user-email: jeffrey82221@gmail.com
   update_release_time:
-    needs: update_latest_json
+    # needs: update_latest_json
     uses: ./.github/workflows/etl_single.yml
     with:
       package-install-command: |

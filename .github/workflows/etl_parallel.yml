@@ -44,7 +44,7 @@ on:
       debug-cnt:
         required: false
         type: number
-        default: 3
+        default: 2
     secrets:
       pat:
         required: true
