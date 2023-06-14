@@ -256,7 +256,6 @@ jobs:
       - name: Display structure of downloaded files
         if: ${{ inputs.passing-tmp-file }}
         run: ls -R
-        working-directory: download
       - name: Merge jsonl
         env: 
           FAST_DEBUG: "${{ inputs.fast-debug }}"
