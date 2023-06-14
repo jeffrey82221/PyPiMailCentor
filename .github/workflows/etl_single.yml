@@ -21,7 +21,7 @@ on:
       user-email:
         required: true
 jobs:
-  update_package_names:
+  update:
     runs-on: ubuntu-latest
     steps:
       - name: checkout 
