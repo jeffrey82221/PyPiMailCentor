@@ -64,7 +64,7 @@ jobs:
       passing-tmp-file: true
       tmp-upload-path: /tmp/info.jsonl
       result-path: data/repo_info.jsonl
-      result-merge-command: cat download/{0..$end}/info.jsonl
+      result-merge-command: cat ./download/{0..$end}/info.jsonl
       fast-debug: true
     secrets:
       pat: ${{ secrets.PERSONAL_TOKEN }}
