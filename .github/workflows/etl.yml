@@ -36,7 +36,7 @@ jobs:
       git-add-command: git add data/latest/ etag/latest/
       passing-tmp-file: false
       result-path: data/latest.menu
-      result-merge-command: ls data/latest/ | grep .json
+      result-merge-command: ls data/latest/ | grep .json >> data/latest.menu
       fast-debug: true
     secrets:
       pat: ${{ secrets.PERSONAL_TOKEN }}
@@ -64,7 +64,13 @@ jobs:
       passing-tmp-file: true
       tmp-upload-path: /tmp/info.jsonl
       result-path: data/repo_info.jsonl
-      result-merge-command: cat ./download/{0..$end}/info.jsonl
+      result-merge-command: |
+        for ((i=0; i<n; i++));
+          do 
+            echo "i=$i";
+            ls ./download/$i
+            cat ./download/$i/info.jsonl >> data/repo_info.jsonl; 
+          done
       fast-debug: true
     secrets:
       pat: ${{ secrets.PERSONAL_TOKEN }}
