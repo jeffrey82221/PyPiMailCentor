@@ -256,7 +256,10 @@ jobs:
       - name: Display structure of downloaded files
         if: ${{ inputs.passing-tmp-file }}
         run: ls -R ./download
-      - name: Merge jsonl
+      - name: Remove target
+        if: ${{ inputs.passing-tmp-file }}
+        run: rm -f ${{ inputs.result-path }}
+      - name: Set Environment
         env: 
           FAST_DEBUG: "${{ inputs.fast-debug }}"
           LOOP_CNT: "${{ inputs.split_cnt }}"
@@ -271,8 +274,8 @@ jobs:
           echo "n=$n"
           end=$(($n-1))
           echo "end=$end"
-          rm -f ${{ inputs.result-path }}
-          ${{ inputs.result-merge-command }} >> ${{ inputs.result-path }}
+      - name: Run merge
+        run: ${{ inputs.result-merge-command }}
       - name: Git commit
         run: |
           git config --global user.name "${{ secrets.user-name }}"
