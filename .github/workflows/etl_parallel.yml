@@ -144,14 +144,14 @@ jobs:
           max_attempts: 3
           timeout_minutes: 180
           command: python ${{ inputs.main-python-file }} ${{ inputs.input-menu-file }} ${{ matrix.alpha }} ${{ inputs.split_cnt }}
-      - name: Git Commit - Jsons (@specific commit-files)
+      - name: Git Commit
         run: |
           rm -f /home/runner/work/PyPiMailCentor/PyPiMailCentor/.git/index.lock
           git config --global user.name "${{ secrets.user-name }}"
           git config --global user.email "${{ secrets.user-email }}"
           ${{ inputs.git-add-command }}
           git diff-index --quiet HEAD || git commit -m '${{ matrix.branch_title}}: (${{ steps.current-time.outputs.time }}-${{ matrix.alpha }})'
-      - name: Push - Jsons
+      - name: Push
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.pat }}
@@ -256,7 +256,7 @@ jobs:
       - name: Display structure of downloaded files
         if: ${{ inputs.passing-tmp-file }}
         run: ls -R ./download
-      - name: Merge jsonl
+      - name: Merge Results
         env: 
           FAST_DEBUG: "${{ inputs.fast-debug }}"
           LOOP_CNT: "${{ inputs.split_cnt }}"
