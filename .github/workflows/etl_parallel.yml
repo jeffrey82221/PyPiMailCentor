@@ -272,7 +272,6 @@ jobs:
           end=$(($n-1))
           echo "end=$end"
           rm -f ${{ inputs.result-path }}
-          ls ./download
           ${{ inputs.result-merge-command }} >> ${{ inputs.result-path }}
       - name: Git commit
         run: |
