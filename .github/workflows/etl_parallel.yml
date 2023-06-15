@@ -255,7 +255,7 @@ jobs:
           path: download
       - name: Display structure of downloaded files
         if: ${{ inputs.passing-tmp-file }}
-        run: ls -R
+        run: ls -R ./download
       - name: Merge jsonl
         env: 
           FAST_DEBUG: "${{ inputs.fast-debug }}"
@@ -272,6 +272,7 @@ jobs:
           end=$(($n-1))
           echo "end=$end"
           rm -f ${{ inputs.result-path }}
+          ls ./download
           ${{ inputs.result-merge-command }} >> ${{ inputs.result-path }}
       - name: Git commit
         run: |
