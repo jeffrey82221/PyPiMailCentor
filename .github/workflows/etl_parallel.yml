@@ -275,6 +275,7 @@ jobs:
           echo "end=$end"
       - name: Run merge
         run: ${{ inputs.result-merge-command }}
+        shell: bash
       - name: Check if result generated
         run: |
           if [ ! -f ${{ inputs.result-path }} ]; then
