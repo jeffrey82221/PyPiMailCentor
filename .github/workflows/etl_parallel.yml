@@ -212,8 +212,8 @@ jobs:
           echo "n=$n"
           for ((i=0; i<n; i++)); 
             do 
-             git fetch origin ${{ steps.branch.outputs.name }}-$i;
-             git switch ${{ steps.branch.outputs.name }}-$i;
+             git fetch origin ${{ steps.branch.outputs.name }}-$i
+             git switch ${{ steps.branch.outputs.name }}-$i
              git switch main
              git pull origin main
              git merge ${{ steps.branch.outputs.name }}-$i --allow-unrelated-histories --strategy-option theirs
