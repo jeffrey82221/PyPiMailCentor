@@ -67,8 +67,6 @@ jobs:
       result-merge-command: |
         for ((i=0; i<n; i++)); do 
           echo "i=$i"
-          ls ./download/$i
-          cat ./download/$i/info.jsonl >> ./data/repo_info.jsonl
         done
       fast-debug: true
     secrets:
