@@ -64,9 +64,10 @@ jobs:
       passing-tmp-file: true
       tmp-upload-path: /tmp/info.jsonl
       result-path: data/repo_info.jsonl
-      result-merge-command: |
-        for ((i=0; i<n; i++)); do 
-          echo "i=$i"
+      result-merge-commad: >-
+        for i in $(find . -type f -name "*.py");
+        do
+         echo "File: ${i} \n";
         done
       fast-debug: true
     secrets:
