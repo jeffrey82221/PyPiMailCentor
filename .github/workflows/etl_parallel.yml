@@ -257,7 +257,6 @@ jobs:
         if: ${{ inputs.passing-tmp-file }}
         run: ls -R ./download
       - name: Remove target
-        if: ${{ inputs.passing-tmp-file }}
         run: rm -f ${{ inputs.result-path }}
       - name: Set Environment
         env: 
@@ -276,6 +275,12 @@ jobs:
           echo "end=$end"
       - name: Run merge
         run: ${{ inputs.result-merge-command }}
+      - name: Check if result generated
+        run: |
+          if [ ! -f ${{ inputs.result-path }} ]; then
+             echo "result not found"
+             exit 1
+          fi
       - name: Git commit
         run: |
           git config --global user.name "${{ secrets.user-name }}"
