@@ -11,9 +11,6 @@ on:
       max-parallel:
         required: true
         type: number
-      package-install-command:
-        required: true
-        type: string
       main-python-file:
         required: true
         type: string
@@ -135,7 +132,7 @@ jobs:
         with:
           python-version: '3.9'
       - name: Run install 
-        run: ${{ inputs.package-install-command }}
+        run: pip install -r requirements.txt
       - name: Insert PAT
         run: echo ${{ secrets.pat }} >> pat.key
       - name: Run update script (@specific)
