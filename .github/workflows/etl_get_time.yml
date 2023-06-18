@@ -1,6 +1,7 @@
 name: init_time
 on:
   workflow_call:
+  workflow_dispatch:
 jobs:
   get_time:
     name: Get execution time
