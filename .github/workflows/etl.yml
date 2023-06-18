@@ -65,11 +65,12 @@ jobs:
       tmp-upload-path: /tmp/info.jsonl
       result-path: data/repo_info.jsonl
       result-merge-command: >-
-        for ((i=0; i<n; i++)); 
+        echo "CNT=$CNT"
+        for ((i=0; i<$CNT; i++)); 
         do
-         echo "i: ${i} \n";
-         ls ./download/$i;
-         cat ./download/$i/info.json >> ./data/repo_info.jsonl;
+           echo "i: ${i} \n"
+           ls "./download/$i" || echo "./download/$i not found"
+           cat "./download/$i/info.jsonl" >> "./data/repo_info.jsonl" || echo "./download/$i/info.jsonl not found"
         done
       fast-debug: true
     secrets:
