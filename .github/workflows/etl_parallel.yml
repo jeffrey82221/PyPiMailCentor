@@ -258,7 +258,8 @@ jobs:
         run: ls -R ./download
       - name: Remove target
         run: rm -f ${{ inputs.result-path }}
-      - name: Set Environment
+      - name: Set Looping Variable
+        id: loop
         env: 
           FAST_DEBUG: "${{ inputs.fast-debug }}"
           LOOP_CNT: "${{ inputs.split_cnt }}"
@@ -270,10 +271,11 @@ jobs:
           else
             n=$LOOP_CNT
           fi
-          echo "n=$n"
-          end=$(($n-1))
-          echo "end=$end"
+          echo "count=$n"
+          echo "count=$n" >> $GITHUB_OUTPUT
       - name: Run merge
+        env: 
+          CNT: "${{ steps.loop.outputs.count }}"
         run: ${{ inputs.result-merge-command }}
         shell: bash
       - name: Check if result generated
