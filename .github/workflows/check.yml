@@ -1,7 +1,15 @@
 name: Check Schema
 on:
-  schedule:
-    - cron: "0 20 * * *"
+  workflow_call:
+    secrets:
+      pat:
+        required: true
+      ssh-private-key:
+        required: true
+      user-name:
+        required: true
+      user-email:
+        required: true
   workflow_dispatch:
 jobs:
   check_schema:
@@ -53,8 +61,8 @@ jobs:
           --split-path content_split/
       - name: Git Config
         run: |
-          git config --global user.name "jeffrey82221"
-          git config --global user.email "jeffrey82221@gmail.com"
+          git config --global user.name "${{ secrets.user-name }}"
+          git config --global user.email "${{ secrets.user-email }}"
       - name: Commit Schema
         run: |
           git add data/*.schema
@@ -67,5 +75,5 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.PERSONAL_TOKEN }}
+          github_token: ${{ secrets.pat }}
           branch: main
