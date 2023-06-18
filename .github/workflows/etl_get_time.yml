@@ -16,6 +16,17 @@ jobs:
         env:
           F_TIME: "${{ steps.current-time.outputs.formattedTime }}"
         run: echo $F_TIME >> ./current-time.txt
+      - name: Debug bash
+        run: >-
+          echo "CNT=$CNT";
+          for ((i=0; i<$CNT; i++)); 
+          do
+             echo "i: ${i} \n";
+             ls "./download/$i" || echo "./download/$i not found";
+             cat "./download/$i/info.jsonl" >> "./data/repo_info.jsonl" || echo "./download/$i/info.jsonl not found";
+          done
+        env:
+          CNT: 3
       - name: Upload current time
         uses: actions/upload-artifact@v3
         with:
