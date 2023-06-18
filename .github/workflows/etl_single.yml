@@ -1,4 +1,4 @@
-name: Update Single Result
+name: single
 on:
   workflow_call:
     inputs:
