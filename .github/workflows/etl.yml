@@ -37,7 +37,7 @@ jobs:
       passing-tmp-file: false
       result-path: data/latest.menu
       result-merge-command: ls data/latest/ | grep .json >> data/latest.menu
-      fast-debug: true
+      fast-debug: false
     secrets:
       pat: ${{ secrets.PERSONAL_TOKEN }}
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -45,7 +45,7 @@ jobs:
       user-email: jeffrey82221@gmail.com
   update_repo_info:
     name: Update Repo Info Json
-    needs: get_time #[update_latest_json, get_time]
+    needs: [update_latest_json, get_time]
     uses: ./.github/workflows/etl_parallel.yml
     with: 
       split_cnt: 50
@@ -72,7 +72,7 @@ jobs:
            ls "./download/$i" || echo "./download/$i not found";
            cat "./download/$i/info.jsonl" >> "./data/repo_info.jsonl";
         done
-      fast-debug: true
+      fast-debug: false
     secrets:
       pat: ${{ secrets.PERSONAL_TOKEN }}
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
