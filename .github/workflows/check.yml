@@ -17,25 +17,40 @@ jobs:
         with:
           python-version: '3.9'
       - name: Install package
-        run: |
-          pip install JSkiner
-          pip install black
-          pip install tqdm
-          pip install blosc
-          pip install scalable-cuckoo-filter
-          pip install requests
-      - name: Sample and Download Release Json
-        run: |
-          python sample_n_download.py data/package.menu ./download 1000
-      - name: Sample and Decrypt Latest Json
+        run: pip install -r requirements.txt
+      - name: Generate data/latest.schema
         run: |
           python sample_n_decrypt.py data/latest ./decrypt 1000
-      - name: Detect schema for pypi release api output
-        run: jskiner --in-path ./download --nworkers 2 --verbose true --out data/release.schema --batch-size 100 --cuckoo-path data/release.cuckoo --cuckoo-size 50000000 --cuckoo-fpr 0.1
-      - name: Detect schema for data/latest
-        run: jskiner --in-path ./decrypt --nworkers 2 --verbose true --out data/latest.schema --batch-size 1000 --cuckoo-path data/latest.cuckoo --cuckoo-size 50000000 --cuckoo-fpr 0.1
-      - name: Detect schema for data/repo_info.jsonl
-        run: jskiner --in-path data/repo_info.jsonl --nworkers 2 --verbose true --out data/repo_info.schema --split 1000 --split-path content_split/
+          jskiner \
+           --in-path ./decrypt \
+           --nworkers 2 \
+           --verbose true \
+           --out data/latest.schema \
+           --batch-size 1000 \
+           --cuckoo-path data/latest.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+      - name: Generate data/release.schema
+        run: |
+          python sample_n_download.py data/package.menu ./download 1000
+          jskiner \
+           --in-path ./download \
+           --nworkers 2 \
+           --verbose true \
+           --out data/release.schema \
+           --batch-size 100 \
+           --cuckoo-path data/release.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+      - name: Generate data/repo_info.schema
+        run: |
+          jskiner \
+          --in-path data/repo_info.jsonl \
+          --nworkers 2 \
+          --verbose true \
+          --out data/repo_info.schema \
+          --split 1000 \
+          --split-path content_split/
       - name: Git Config
         run: |
           git config --global user.name "jeffrey82221"
