@@ -2,9 +2,6 @@ name: Update Single Result
 on:
   workflow_call:
     inputs:
-      package-install-command:
-        required: true
-        type: string
       main-python-file:
         required: true
         type: string
@@ -36,7 +33,7 @@ jobs:
         with:
           python-version: '3.9'
       - name: Install package
-        run: ${{ inputs.package-install-command }}
+        run: pip install -r requirements.txt
       - name: Run update script
         run : |
          python ${{ inputs.main-python-file }}
