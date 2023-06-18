@@ -4,13 +4,6 @@ on:
    - cron: "0 0 2 * *"
   workflow_dispatch:
 jobs:
-  check_schema:
-    uses: ./.github/workflows/check.yml
-    secrets:
-      pat: ${{ secrets.PERSONAL_TOKEN }}
-      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      user-name: jeffrey82221
-      user-email: jeffrey82221@gmail.com
   get_time:
     uses: ./.github/workflows/etl_get_time.yml
   update_package_names:
@@ -77,6 +70,14 @@ jobs:
     with:
       main-python-file: update_release_time.py
       result-path: data/release_time
+    secrets:
+      pat: ${{ secrets.PERSONAL_TOKEN }}
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      user-name: jeffrey82221
+      user-email: jeffrey82221@gmail.com
+  check_schema:
+    uses: ./.github/workflows/check.yml
+    needs: [update_package_names, update_latest_json, update_repo_info]
     secrets:
       pat: ${{ secrets.PERSONAL_TOKEN }}
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
