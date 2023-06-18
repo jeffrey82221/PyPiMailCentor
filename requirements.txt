@@ -9,3 +9,6 @@ JSkiner
 pandas==1.4.2
 pyarrow==8.0.0
 pypistats==1.1.0
+toolz
+cytoolz==0.12.1
+httpx==0.23.0
