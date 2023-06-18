@@ -18,7 +18,7 @@ jobs:
         run: echo $F_TIME >> ./current-time.txt
       - name: Debug bash
         run: >-
-          echo "CNT=$CNT";
+          echo "CNT=$CNT"
           for ((i=0; i<$CNT; i++)); 
           do
              echo "i: ${i} \n";
