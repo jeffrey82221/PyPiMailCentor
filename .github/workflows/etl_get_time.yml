@@ -15,7 +15,7 @@ jobs:
       - name: write current time to file
         env:
           F_TIME: "${{ steps.current-time.outputs.formattedTime }}"
-        run: echo $F_TIME >> ./current-
+        run: echo $F_TIME >> ./current-time.txt
       - name: Upload current time
         uses: actions/upload-artifact@v3
         with:
