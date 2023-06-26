@@ -138,8 +138,9 @@ jobs:
       - name: Run update script (@specific)
         uses: nick-fields/retry@v2
         with:
-          max_attempts: 3
+          max_attempts: 5
           timeout_minutes: 180
+          retry_wait_seconds: 1800
           command: python ${{ inputs.main-python-file }} ${{ inputs.input-menu-file }} ${{ matrix.alpha }} ${{ inputs.split_cnt }}
       - name: Git Commit - Jsons (@specific commit-files)
         run: |
