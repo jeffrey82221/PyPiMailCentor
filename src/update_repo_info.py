@@ -3,39 +3,6 @@ Extract info of packages and save into a Json file
 
 source: data/latest
 target: data/package_info.json
-
-Enhance Efficiency: 
-- [X] Do github repo checking every week only 
-- [X] No need to show downloads_in_180days and license
-- [X] Add filter to ignore package having owner/repo extracted 
-
-Feature: 
-- [ ] Extract download at another job. 
-
-Refactor: 
-- [X] Build Registered Pipeline
-    - [X] Unit: extract method + transform method + target_field_name
-    - [X] Ordering: start: get_data >> filter: has_info >> map: [unit1, unit2, unit3] >> map: [unit4, unit5, unit6] >> filter: xxx
-- Fix: rate limit. When using GITHUB_TOKEN , the rate limit is 1,000 requests per hour per repository.
-- [X] Think about how to debug the pipeline on each node. 
-- [X] Refactor: 
-    - [X] Save latest json file names into latest.menu
-    - [X] Move the following segment in update_all.py to update_all.py and update_latest.py
-        as do_etl
-        ```
-        # Do update
-        with open(f"{SPLIT_PATH}/{file}", "r") as f:
-            pkgs = list(map(lambda x: x.strip(), f))
-            for pkg in tqdm.tqdm(pkgs, desc=f"{pkgs[0]}~{pkgs[-1]}"):
-                update(pkg)
-        ```
-    - [X] Enable update_all.py to take SRC_PATH as input
-    - [X] Move extract_package_info.py to src/ and rename as update_info.py
-    - [X] Apply update_all.py to `update` of update_info.py
-- [X] Feature: Run crawling using multiple github action jobs (for speed up.)
-- [X] Check if the github url is the true github repo
-- [X] Add access token to Github API call
-
 """
 import os
 import binascii
@@ -193,8 +160,9 @@ def get_180days_download_count(pkg_name, max_try=10):
     for i in range(max_try):
         try:
             json_str = pypistats.overall(pkg_name, format="json")
-            wm_data, wom_data = json.loads(json_str)["data"]
-            result = wm_data["downloads"] + wom_data["downloads"]
+            data = json.loads(json_str)["data"]
+            downloads = [x["downloads"] for x in data]
+            result = max(downloads)
             break
         except HTTPStatusError as e:
             if e.response.status_code == 404:
