@@ -26,6 +26,19 @@ jobs:
           python-version: '3.9'
       - name: Install package
         run: pip install -r requirements.txt
+      - name: Generate data/repo.schema (@many-folder-json)
+        run: |
+          python sample_n_decrypt.py data/repo/pandas ./decrypt 1000
+          jskiner \
+           --in-path ./decrypt \
+           --nworkers 2 \
+           --verbose true \
+           --out data/repo.schema \
+           --batch-size 1000 \
+           --cuckoo-path data/repo.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+          rm -rf ./decrypt
       - name: Generate data/latest.schema (@single-folder-json)
         run: |
           python sample_n_decrypt.py data/latest ./decrypt 1000
@@ -51,22 +64,7 @@ jobs:
            --cuckoo-path data/release.cuckoo \
            --cuckoo-size 50000000 \
            --cuckoo-fpr 0.1
-      - name: Generate data/repo.schema (@many-folder-json)
-        run: |
-          mkdir -p json_tmp
-          find data/repo -type f -name "*.json" -exec cp {} json_tmp/ \;
-          python sample_n_decrypt.py json_tmp ./decrypt 1000
-          jskiner \
-           --in-path ./decrypt \
-           --nworkers 2 \
-           --verbose true \
-           --out data/repo.schema \
-           --batch-size 1000 \
-           --cuckoo-path data/repo.cuckoo \
-           --cuckoo-size 50000000 \
-           --cuckoo-fpr 0.1
-          rm -rf ./decrypt
-          rm -rf ./json_tmp
+          rm -rf ./download
       - name: Generate data/star.schema (@many-folder-json)
         run: |
           mkdir -p json_tmp
