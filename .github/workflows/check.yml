@@ -28,7 +28,7 @@ jobs:
         run: pip install -r requirements.txt
       - name: Generate data/repo.schema (@many-folder-json)
         run: |
-          python sample_n_decrypt.py data/repo/aafun ./decrypt 1000
+          python sample_n_decrypt.py data/repo ./decrypt 1000
           jskiner \
            --in-path ./decrypt \
            --nworkers 2 \
@@ -67,9 +67,7 @@ jobs:
           rm -rf ./download
       - name: Generate data/star.schema (@many-folder-json)
         run: |
-          mkdir -p json_tmp
-          find data/star -type f -name "*.json" -exec cp {} json_tmp/ \;
-          python sample_n_decrypt.py json_tmp ./decrypt 1000
+          python sample_n_decrypt.py data/star ./decrypt 1000
           jskiner \
            --in-path ./decrypt \
            --nworkers 2 \
@@ -80,12 +78,9 @@ jobs:
            --cuckoo-size 50000000 \
            --cuckoo-fpr 0.1
           rm -rf ./decrypt
-          rm -rf ./json_tmp
       - name: Generate data/fork.schema (@many-folder-json)
         run: |
-          mkdir -p json_tmp
-          find data/fork -type f -name "*.json" -exec cp {} json_tmp/ \;
-          python sample_n_decrypt.py json_tmp ./decrypt 1000
+          python sample_n_decrypt.py data/fork ./decrypt 1000
           jskiner \
            --in-path ./decrypt \
            --nworkers 2 \
@@ -96,12 +91,9 @@ jobs:
            --cuckoo-size 50000000 \
            --cuckoo-fpr 0.1
           rm -rf ./decrypt
-          rm -rf ./json_tmp
       - name: Generate data/watcher.schema (@many-folder-json)
         run: |
-          mkdir -p json_tmp
-          find data/watcher -type f -name "*.json" -exec cp {} json_tmp/ \;
-          python sample_n_decrypt.py json_tmp ./decrypt 1000
+          python sample_n_decrypt.py data/watcher ./decrypt 1000
           jskiner \
            --in-path ./decrypt \
            --nworkers 2 \
@@ -112,7 +104,6 @@ jobs:
            --cuckoo-size 50000000 \
            --cuckoo-fpr 0.1
           rm -rf ./decrypt
-          rm -rf ./json_tmp
       - name: Generate data/repo_info.schema (@jsonl)
         run: |
           jskiner \
