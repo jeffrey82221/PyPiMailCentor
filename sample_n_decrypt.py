@@ -16,7 +16,8 @@ def run(src_path, target_path, sample_size):
         os.mkdir(target_path)
     for file in tqdm.tqdm(sampled_files):
         json_obj = json_tool.load(f"{file}")
-        JsonTool._dump_original(f"{target_path}/{file.split("/")[-1]}", json_obj)
+        json_file = file.split("/")[-1]
+        JsonTool._dump_original(f"{target_path}/{json_file}", json_obj)
 
 
 if __name__ == "__main__":
