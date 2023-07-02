@@ -9,7 +9,8 @@ from src.json_tool import json_tool, JsonTool
 
 
 def run(src_path, target_path, sample_size):
-    files = os.listdir(src_path)
+    files = [os.path.join(root, file) for root, dirs, files in os.walk(src_path) for file in files if file.endswith('.json')]
+    print("Number of src json files:", len(files))
     sampled_files = random.sample(files, sample_size)
     if not os.path.exists(target_path):
         os.mkdir(target_path)
