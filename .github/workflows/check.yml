@@ -28,7 +28,7 @@ jobs:
         run: pip install -r requirements.txt
       - name: Generate data/repo.schema (@many-folder-json)
         run: |
-          python sample_n_decrypt.py data/repo/pandas ./decrypt 1000
+          python sample_n_decrypt.py data/repo/aafun ./decrypt 1000
           jskiner \
            --in-path ./decrypt \
            --nworkers 2 \
