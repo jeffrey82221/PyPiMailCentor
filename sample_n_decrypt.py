@@ -9,15 +9,13 @@ from src.json_tool import json_tool, JsonTool
 
 
 def run(src_path, target_path, sample_size):
-    files = [os.path.join(root, file) for root, dirs, files in os.walk(src_path) for file in files if file.endswith('.json')]
-    print("Number of src json files:", len(files))
+    files = os.listdir(src_path)
     sampled_files = random.sample(files, sample_size)
     if not os.path.exists(target_path):
         os.mkdir(target_path)
     for file in tqdm.tqdm(sampled_files):
-        json_obj = json_tool.load(f"{file}")
-        json_file = file.split("/")[-1]
-        JsonTool._dump_original(f"{target_path}/{json_file}", json_obj)
+        json_obj = json_tool.load(f"{src_path}/{file}")
+        JsonTool._dump_original(f"{target_path}/{file}", json_obj)
 
 
 if __name__ == "__main__":
