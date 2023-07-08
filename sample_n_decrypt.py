@@ -12,9 +12,11 @@ def run(src_path, target_path, sample_size):
     # files = os.listdir(src_path)
     files = []
     for dir_, _, fns in os.walk(src_path):
+        print(dir_, fns)
         for fn in fns:
             if fn.endswith('.json'):
                 files.append(os.path.join(dir_, fn))
+    print(files)
     sampled_files = random.sample(files, sample_size)
     if not os.path.exists(target_path):
         os.mkdir(target_path)

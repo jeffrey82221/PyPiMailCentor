@@ -1,15 +1,7 @@
-name: Check
-on:
-  workflow_call:
-    secrets:
-      pat:
-        required: true
-      ssh-private-key:
-        required: true
-      user-name:
-        required: true
-      user-email:
-        required: true
+name: Check Schema
+on: 
+  schedule:
+   - cron: "0 0 8-31 * *"
   workflow_dispatch:
 jobs:
   check_schema:
@@ -26,18 +18,58 @@ jobs:
           python-version: '3.9'
       - name: Install package
         run: pip install -r requirements.txt
-      - name: Generate data/stars.schema
+      - name: Generate data/star.schema
         run: |
-          python sample_n_decrypt.py data/stars ./decrypt 1000
+          python sample_n_decrypt.py data/star ./decrypt 1000
           jskiner \
            --in-path ./decrypt \
            --nworkers 2 \
            --verbose true \
-           --out data/stars.schema \
+           --out data/star.schema \
            --batch-size 1000 \
-           --cuckoo-path data/stars.cuckoo \
+           --cuckoo-path data/star.cuckoo \
            --cuckoo-size 50000000 \
            --cuckoo-fpr 0.1
+          rm -rf ./decrypt
+      - name: Generate data/fork.schema
+        run: |
+          python sample_n_decrypt.py data/fork ./decrypt 1000
+          jskiner \
+           --in-path ./decrypt \
+           --nworkers 2 \
+           --verbose true \
+           --out data/fork.schema \
+           --batch-size 1000 \
+           --cuckoo-path data/fork.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+          rm -rf ./decrypt
+      - name: Generate data/watcher.schema
+        run: |
+          python sample_n_decrypt.py data/watcher ./decrypt 1000
+          jskiner \
+           --in-path ./decrypt \
+           --nworkers 2 \
+           --verbose true \
+           --out data/watcher.schema \
+           --batch-size 1000 \
+           --cuckoo-path data/watcher.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+          rm -rf ./decrypt
+      - name: Generate data/repo.schema
+        run: |
+          python sample_n_decrypt.py data/repo ./decrypt 1000
+          jskiner \
+           --in-path ./decrypt \
+           --nworkers 2 \
+           --verbose true \
+           --out data/repo.schema \
+           --batch-size 1000 \
+           --cuckoo-path data/repo.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+          rm -rf ./decrypt
       - name: Generate data/latest.schema
         run: |
           python sample_n_decrypt.py data/latest ./decrypt 1000
@@ -50,6 +82,7 @@ jobs:
            --cuckoo-path data/latest.cuckoo \
            --cuckoo-size 50000000 \
            --cuckoo-fpr 0.1
+          rm -rf ./decrypt
       - name: Generate data/release.schema
         run: |
           python sample_n_download.py data/package.menu ./download 1000
@@ -62,6 +95,7 @@ jobs:
            --cuckoo-path data/release.cuckoo \
            --cuckoo-size 50000000 \
            --cuckoo-fpr 0.1
+          rm -rf ./download
       - name: Generate data/repo_info.schema
         run: |
           jskiner \
@@ -73,8 +107,8 @@ jobs:
           --split-path content_split/
       - name: Git Config
         run: |
-          git config --global user.name "${{ secrets.user-name }}"
-          git config --global user.email "${{ secrets.user-email }}"
+          git config --global user.name "jeffrey82221"
+          git config --global user.email "jeffrey82221@gmail.com"
       - name: Commit Schema
         run: |
           git add data/*.schema
@@ -87,5 +121,5 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.pat }}
+          github_token: ${{ secrets.PERSONAL_TOKEN }}
           branch: main
