@@ -1,4 +1,4 @@
-name: Check Schema
+name: Check
 on:
   workflow_call:
     secrets:
