@@ -18,6 +18,41 @@ jobs:
           python-version: '3.9'
       - name: Install package
         run: pip install -r requirements.txt
+      - name: Generate data/latest.schema
+        run: |
+          python sample_n_decrypt.py data/latest ./decrypt 1000
+          jskiner \
+           --in-path ./decrypt \
+           --nworkers 2 \
+           --verbose true \
+           --out data/latest.schema \
+           --batch-size 1000 \
+           --cuckoo-path data/latest.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+          rm -rf ./decrypt
+      - name: Generate data/release.schema
+        run: |
+          python sample_n_download.py data/package.menu ./download 1000
+          jskiner \
+           --in-path ./download \
+           --nworkers 2 \
+           --verbose true \
+           --out data/release.schema \
+           --batch-size 100 \
+           --cuckoo-path data/release.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+          rm -rf ./download
+      - name: Generate data/repo_info.schema
+        run: |
+          jskiner \
+          --in-path data/repo_info.jsonl \
+          --nworkers 2 \
+          --verbose true \
+          --out data/repo_info.schema \
+          --split 1000 \
+          --split-path content_split/
       - name: Generate data/star.schema
         run: |
           python sample_n_decrypt.py data/star ./decrypt 1000
@@ -70,41 +105,6 @@ jobs:
            --cuckoo-size 50000000 \
            --cuckoo-fpr 0.1
           rm -rf ./decrypt
-      - name: Generate data/latest.schema
-        run: |
-          python sample_n_decrypt.py data/latest ./decrypt 1000
-          jskiner \
-           --in-path ./decrypt \
-           --nworkers 2 \
-           --verbose true \
-           --out data/latest.schema \
-           --batch-size 1000 \
-           --cuckoo-path data/latest.cuckoo \
-           --cuckoo-size 50000000 \
-           --cuckoo-fpr 0.1
-          rm -rf ./decrypt
-      - name: Generate data/release.schema
-        run: |
-          python sample_n_download.py data/package.menu ./download 1000
-          jskiner \
-           --in-path ./download \
-           --nworkers 2 \
-           --verbose true \
-           --out data/release.schema \
-           --batch-size 100 \
-           --cuckoo-path data/release.cuckoo \
-           --cuckoo-size 50000000 \
-           --cuckoo-fpr 0.1
-          rm -rf ./download
-      - name: Generate data/repo_info.schema
-        run: |
-          jskiner \
-          --in-path data/repo_info.jsonl \
-          --nworkers 2 \
-          --verbose true \
-          --out data/repo_info.schema \
-          --split 1000 \
-          --split-path content_split/
       - name: Git Config
         run: |
           git config --global user.name "jeffrey82221"
