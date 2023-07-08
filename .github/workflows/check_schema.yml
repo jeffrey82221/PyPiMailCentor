@@ -1,8 +1,91 @@
-check_schema:
-    needs: [update_repo_info, update_latest_json, update_package_names]
-    uses: ./.github/workflows/check.yml
+name: Check Schema
+on:
+  workflow_call:
     secrets:
-      pat: ${{ secrets.PERSONAL_TOKEN }}
-      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      user-name: jeffrey82221
-      user-email: jeffrey82221@gmail.com
+      pat:
+        required: true
+      ssh-private-key:
+        required: true
+      user-name:
+        required: true
+      user-email:
+        required: true
+  workflow_dispatch:
+jobs:
+  check_schema:
+    name: Checking the Schema of Release Json(s)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: Set Up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+      - name: Install package
+        run: pip install -r requirements.txt
+      - name: Generate data/stars.schema
+        run: |
+          python sample_n_decrypt.py data/stars ./decrypt 1000
+          jskiner \
+           --in-path ./decrypt \
+           --nworkers 2 \
+           --verbose true \
+           --out data/stars.schema \
+           --batch-size 1000 \
+           --cuckoo-path data/stars.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+      - name: Generate data/latest.schema
+        run: |
+          python sample_n_decrypt.py data/latest ./decrypt 1000
+          jskiner \
+           --in-path ./decrypt \
+           --nworkers 2 \
+           --verbose true \
+           --out data/latest.schema \
+           --batch-size 1000 \
+           --cuckoo-path data/latest.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+      - name: Generate data/release.schema
+        run: |
+          python sample_n_download.py data/package.menu ./download 1000
+          jskiner \
+           --in-path ./download \
+           --nworkers 2 \
+           --verbose true \
+           --out data/release.schema \
+           --batch-size 100 \
+           --cuckoo-path data/release.cuckoo \
+           --cuckoo-size 50000000 \
+           --cuckoo-fpr 0.1
+      - name: Generate data/repo_info.schema
+        run: |
+          jskiner \
+          --in-path data/repo_info.jsonl \
+          --nworkers 2 \
+          --verbose true \
+          --out data/repo_info.schema \
+          --split 1000 \
+          --split-path content_split/
+      - name: Git Config
+        run: |
+          git config --global user.name "${{ secrets.user-name }}"
+          git config --global user.email "${{ secrets.user-email }}"
+      - name: Commit Schema
+        run: |
+          git add data/*.schema
+          git add data/*.cuckoo
+          git diff-index --quiet HEAD || git commit -m 'update: schema'
+      - name: Git pull
+        run: |
+          git config pull.rebase false
+          git pull origin main || echo 'pull failed'
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.pat }}
+          branch: main
