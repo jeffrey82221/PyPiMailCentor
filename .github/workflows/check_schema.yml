@@ -1,0 +1,8 @@
+check_schema:
+    needs: [update_repo_info, update_latest_json, update_package_names]
+    uses: ./.github/workflows/check.yml
+    secrets:
+      pat: ${{ secrets.PERSONAL_TOKEN }}
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      user-name: jeffrey82221
+      user-email: jeffrey82221@gmail.com
