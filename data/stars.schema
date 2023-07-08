@@ -1,0 +1,24 @@
+Array(
+    Record(
+        {
+            "avatar_url": Atomic(Str()),
+            "events_url": Atomic(Str()),
+            "followers_url": Atomic(Str()),
+            "following_url": Atomic(Str()),
+            "gists_url": Atomic(Str()),
+            "gravatar_id": Atomic(Str()),
+            "html_url": Atomic(Str()),
+            "id": Atomic(Int()),
+            "login": Atomic(Str()),
+            "node_id": Atomic(Str()),
+            "organizations_url": Atomic(Str()),
+            "received_events_url": Atomic(Str()),
+            "repos_url": Atomic(Str()),
+            "site_admin": Atomic(Bool()),
+            "starred_url": Atomic(Str()),
+            "subscriptions_url": Atomic(Str()),
+            "type": Atomic(Str()),
+            "url": Atomic(Str()),
+        }
+    )
+)
