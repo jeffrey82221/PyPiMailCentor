@@ -408,9 +408,14 @@ Record(
                 "language": Optional(Atomic(Str())),
                 "languages_url": Atomic(Str()),
                 "license": Optional(
-                    UniformRecord(
-                        FieldSet({"key", "name", "node_id", "spdx_id", "url"}),
-                        Atomic(Str()),
+                    Record(
+                        {
+                            "key": Atomic(Str()),
+                            "name": Atomic(Str()),
+                            "node_id": Atomic(Str()),
+                            "spdx_id": Atomic(Str()),
+                            "url": Optional(Atomic(Str())),
+                        }
                     )
                 ),
                 "merges_url": Atomic(Str()),
