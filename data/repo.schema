@@ -158,7 +158,7 @@ Record(
                 "issues_url": Atomic(Str()),
                 "keys_url": Atomic(Str()),
                 "labels_url": Atomic(Str()),
-                "language": Atomic(Str()),
+                "language": Optional(Atomic(Str())),
                 "languages_url": Atomic(Str()),
                 "license": Optional(
                     Record(
@@ -280,7 +280,7 @@ Record(
                 "issues_url": Atomic(Str()),
                 "keys_url": Atomic(Str()),
                 "labels_url": Atomic(Str()),
-                "language": Atomic(Str()),
+                "language": Optional(Atomic(Str())),
                 "languages_url": Atomic(Str()),
                 "license": Optional(
                     Record(
